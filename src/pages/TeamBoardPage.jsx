@@ -75,6 +75,19 @@ const TeamBoardPage = () => {
     }
   };
 
+  const handleDeleteTask = async () => {
+    if (!activeTask) return;
+    if (!window.confirm("Are you sure you want to delete this task?")) return;
+    try {
+      await teamTaskApi.delete(teamId, activeTask._id);
+      setActiveTask(null);
+      loadBoard(); // Refresh board
+    } catch (err) {
+      console.error("Failed to delete task", err);
+      // Optional: Set error state
+    }
+  };
+
   if (!team) return <div className="p-8">Loading team board...</div>;
 
   return (
@@ -227,6 +240,17 @@ const TeamBoardPage = () => {
                       </div>
                     </div>
                   </div>
+                </div>
+
+                {/* Actions */}
+                <div className="card bg-gray-50 border-none shadow-none">
+                  <h5 className="text-xs font-bold text-gray-500 uppercase mb-3">Actions</h5>
+                  <button
+                    onClick={handleDeleteTask}
+                    className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded transition-colors flex items-center gap-2"
+                  >
+                    <X size={16} /> Delete Task
+                  </button>
                 </div>
               </div>
             </div>

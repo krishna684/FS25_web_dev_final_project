@@ -1,131 +1,84 @@
-TaskFlow – Database Architecture (MongoDB + Mongoose)
+# TaskFlow
 
-TaskFlow uses MongoDB as its primary database, with Mongoose providing schema validation, indexing, and relationship modeling.  
-The database is designed to support both personal productivity tools and team collaboration features such as:
+**TaskFlow** is a comprehensive productivity and team collaboration platform designed to streamline workflow management. Built with the **MERN stack** (MongoDB, Express, React, Node.js), it offers a robust set of features for both personal task tracking and team-based project management.
 
-- Personal tasks  
-- Kanban boards  
-- Comments and discussion threads  
-- Notifications  
-- Activity logs  
-- Team membership and assignment workflows  
+![TaskFlow Dashboard](https://via.placeholder.com/800x400.png?text=TaskFlow+Dashboard+Preview)
 
-This document describes the database schema, indexes, relationships, and seed data used throughout the application.
+## 🚀 Features
 
-//Collections & Schemas
+### Core Productivity
+- **Personal Dashboard**: Track daily tasks, upcoming deadlines, and recent activity at a glance.
+- **My Tasks**: Manage personal to-dos with filtering (status, date) and sorting.
+- **Calendar View**: Visualize deadlines and events on a monthly calendar.
 
-TaskFlow uses six core MongoDB collections, each represented by a Mongoose model.
+### Team Collaboration
+- **Team Management**: Create teams, invite members via **Invite Codes**, and manage roles.
+- **Kanban Boards**: Visualize team workflows with drag-and-drop support (UI ready).
+- **Activity Logs**: Real-time tracking of team actions (task creation, updates, comments).
 
+### Enhanced Experience
+- **Global Search**: Instantly find Tasks, Teams, and People from the navigation bar.
+- **Dark Mode**: Fully supported dark theme for low-light environments.
+- **Notifications**: Stay updated with a dedicated notification system.
 
-1. **User**
-Stores account information, authentication metadata, and preferences.
+## 🛠️ Tech Stack
 
-**Key Fields**
-- `name`, `email`, `passwordHash`
-- `teams[]` – references to Team memberships
-- `settings` – notification settings, timezone
-- `lastLoginAt`
-- `passwordChangedAt`
+- **Frontend**: React, Vite, Tailwind-like CSS variables, Axios, Lucide React (Icons).
+- **Backend**: Node.js, Express, Mongoose (MongoDB).
+- **Database**: MongoDB.
+- **Authentication**: JWT (JSON Web Tokens) & bcrypt.
 
-**Indexes**
-- `email` *(unique)*  
-- `teams.user` *(fast membership queries)*  
+## 📦 Installation & Setup
 
----
+1.  **Clone the Repository**
+    ```bash
+    git clone https://github.com/yourusername/taskflow.git
+    cd taskflow
+    ```
 
-2. **Team**
-Represents collaborative workspaces for groups of users.
+2.  **Install Dependencies**
+    ```bash
+    npm install
+    ```
 
-**Key Fields**
-- `name`, `description`
-- `owner` (User)
-- `members[]` – array of `{ user, role }`
-- `inviteCode` *(optional)*
+3.  **Environment Configuration**
+    Create a `.env` file in the root directory based on `.env.example`:
+    ```env
+    PORT=5000
+    MONGODB_URI=mongodb://127.0.0.1:27017/taskflow
+    JWT_SECRET=your_super_secret_key_123
+    NODE_ENV=development
+    ```
 
-**Indexes**
-- `owner`
-- `members.user`
+4.  **Seed the Database** (Optional but recommended for testing)
+    Populate the database with test users, teams, and tasks:
+    ```bash
+    npm run seed
+    ```
 
----
+## 🏃‍♂️ Running the Application
 
-3. **Task**
-Represents both personal tasks and team Kanban tasks.
+To run both the backend server and frontend client concurrently:
 
-**Key Fields**
-- `title`, `description`
-- `isTeamTask` *(true = team task, false = personal task)*
-- `owner` *(for personal tasks)*
-- `team` *(for team tasks)*
-- `assignedTo` *(User)*
-- `status` – `todo`, `in-progress`, `done`
-- `priority` – `low`, `medium`, `high`
-- `orderIndex` *(Kanban ordering)*
-- `dueDate`, `completedAt`
+```bash
+npm run dev
+```
 
-**Indexes**
-- Personal dashboards: `{ owner, isTeamTask, status, dueDate }`
-- Kanban board: `{ team, status, orderIndex }`
-- Assigned tasks: `{ assignedTo, status, dueDate }`
-- Calendar queries: `{ dueDate }`
+- **Frontend**: http://localhost:5173
+- **Backend API**: http://localhost:5000
 
----
+## 🧪 Verification
 
-4. **Comment**
-Represents comment threads attached to tasks.
+To verify key features like Global Search, you can run the included test script:
 
-**Key Fields**
-- `task` (Task)
-- `author` (User)
-- `content`
+```bash
+node verify_search_feature.js
+```
 
-**Indexes**
-- `{ task, createdAt }`
+## 📖 Documentation
 
----
+- [Database Architecture](docs/DATABASE_ARCHITECTURE.md) - Detailed schema information.
 
-5. **Activity**
-Tracks meaningful events within the workspace.
+## 📄 License
 
-**Examples**
-- Task creation
-- Status updates
-- New assignments
-- Comments added
-- Team member joined
-- Notification triggered
-
-**Key Fields**
-- `actor` (User)
-- `team` (Team)
-- `task` (Task)
-- `type`
-- `message`
-- `meta` *(additional event metadata)*
-
-**Indexes**
-- `{ team, createdAt }`
-- `{ task, createdAt }`
-- `{ actor, createdAt }`
-
----
-
-6. **Notification**
-Used for the notification bell and notification inbox.
-
-**Key Fields**
-- `recipient` (User)
-- `type` *(task assigned, comment added, due soon, etc.)*
-- `title`, `body`
-- `task` *(optional reference)*
-- `team` *(optional reference)*
-- `isRead`, `readAt`
-
-**Indexes**
-- `{ recipient, isRead, createdAt }`
-
----
-
-Seed Data (Testing & Demo)
-
-The application includes a full seed script located at:
-npm run seed
+This project is open-source and available under the [MIT License](LICENSE).
