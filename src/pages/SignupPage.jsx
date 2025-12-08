@@ -13,6 +13,7 @@ const SignupPage = () => {
     confirmPassword: "",
   });
   const [error, setError] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const handleChange = (e) => {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
@@ -27,74 +28,113 @@ const SignupPage = () => {
       return;
     }
 
+    if (!acceptedTerms) {
+      setError("You must accept the Terms and Privacy Policy.");
+      return;
+    }
+
     try {
-      await signup(form.name, form.email, form.password); // axios inside
+      await signup(form.name, form.email, form.password);
       navigate("/dashboard");
     } catch (err) {
       console.error("Signup failed", err);
-      setError("Failed to sign up.");
+      const msg = err.response?.data?.error || "Failed to sign up.";
+      setError(msg);
     }
   };
 
   return (
     <div className="auth-bg">
-      <div className="auth-page">
-        <h1 style={{ marginBottom: "1rem" }}>Create account</h1>
-        <form className="auth-form" onSubmit={handleSubmit}>
-          <label>
-            Name
+      <div className="auth-card">
+        <div className="text-center mb-8">
+          <h1 className="auth-title">Create an account</h1>
+          <p className="auth-subtitle">Start your 30-day free trial. Cancel anytime.</p>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          {error && (
+            <div className="bg-red-50 text-red-600 p-3 rounded mb-4 text-sm border border-red-200">
+              {error}
+            </div>
+          )}
+
+          <div className="form-group">
+            <label className="form-label">Full Name</label>
             <input
               type="text"
               name="name"
               value={form.name}
               onChange={handleChange}
+              className="form-input"
+              placeholder="John Doe"
               required
             />
-          </label>
+          </div>
 
-          <label>
-            Email
+          <div className="form-group">
+            <label className="form-label">Email</label>
             <input
               type="email"
               name="email"
               value={form.email}
               onChange={handleChange}
+              className="form-input"
+              placeholder="you@example.com"
               required
             />
-          </label>
+          </div>
 
-          <label>
-            Password
+          <div className="form-group">
+            <label className="form-label">Password</label>
             <input
               type="password"
               name="password"
               value={form.password}
               onChange={handleChange}
+              className="form-input"
+              placeholder="At least 8 characters"
               required
             />
-          </label>
+          </div>
 
-          <label>
-            Confirm password
+          <div className="form-group">
+            <label className="form-label">Confirm Password</label>
             <input
               type="password"
               name="confirmPassword"
               value={form.confirmPassword}
               onChange={handleChange}
+              className="form-input"
+              placeholder="Repeat password"
               required
             />
-          </label>
+          </div>
 
-          {error && <div className="error">{error}</div>}
+          <div className="form-group flex items-start gap-2">
+            <input
+              type="checkbox"
+              id="terms"
+              checked={acceptedTerms}
+              onChange={(e) => setAcceptedTerms(e.target.checked)}
+              className="mt-1"
+              style={{ width: 16, height: 16 }}
+            />
+            <label htmlFor="terms" className="text-sm text-gray-600 cursor-pointer lh-sm">
+              I agree to the <Link to="/terms" className="text-primary hover:underline">Terms of Service</Link> and <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.
+            </label>
+          </div>
 
-          <button className="btn-primary" type="submit" style={{ marginTop: "0.5rem" }}>
-            Sign up
+          <button className="btn btn-primary btn-block mb-6" type="submit">
+            Create Account
           </button>
-        </form>
 
-        <p style={{ marginTop: "1rem", fontSize: "0.9rem" }}>
-          Already have an account? <Link to="/login">Login</Link>
-        </p>
+          <p className="text-center text-sm text-gray-600">
+            Already have an account?{" "}
+            <Link to="/login" style={{ color: 'var(--primary)', fontWeight: 600, textDecoration: 'none' }}>
+              Log in
+            </Link>
+          </p>
+        </form>
       </div>
     </div>
   );

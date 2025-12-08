@@ -6,8 +6,8 @@ const TeamList = ({ teams }) => {
   return (
     <ul className="team-list">
       {teams.map((t) => (
-        <li key={t.id}>
-          <Link to={`/teams/${t.id}`}>{t.name}</Link>
+        <li key={t._id}>
+          <Link to={`/teams/${t._id}`}>{t.name}</Link>
         </li>
       ))}
     </ul>

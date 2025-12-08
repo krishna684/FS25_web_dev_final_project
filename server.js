@@ -3,10 +3,61 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
+// Validate required environment variables
+if (!process.env.JWT_SECRET) {
+  console.error('FATAL ERROR: JWT_SECRET is not defined in environment variables');
+  process.exit(1);
+}
+if (!process.env.MONGODB_URI) {
+  console.error('FATAL ERROR: MONGODB_URI is not defined in environment variables');
+  process.exit(1);
+}
+
 const app = express();
 
+const authRoutes = require('./routes/authRoutes');
+const taskRoutes = require('./routes/taskRoutes');
+const teamRoutes = require('./routes/teamRoutes');
+const teamTaskRoutes = require('./routes/teamTaskRoutes');
+const commentRoutes = require('./routes/commentRoutes');
+
+const rateLimit = require('express-rate-limit');
+const notificationRoutes = require('./routes/notificationRoutes');
+const activityRoutes = require('./routes/activityRoutes');
+const searchRoutes = require('./routes/searchRoutes');
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173', // Vite default port
+  credentials: true
+}));
+
+// Apply rate limiting to auth routes
+app.use('/api/auth', limiter, authRoutes);
+
+// Routes
+app.use('/api/tasks', taskRoutes);
+app.use('/api/teams', teamRoutes);
+app.use('/api/notifications', notificationRoutes);
+app.use('/api/search', searchRoutes);
+
+// Nested routes:
+// /api/teams/:teamId/tasks
+// /api/teams/:teamId/tasks
+app.use('/api/teams/:teamId/tasks', teamTaskRoutes);
+// /api/teams/:teamId/activity
+app.use('/api/teams/:teamId/activity', activityRoutes);
+
+// Global Activity Route
+app.use('/api/activity', activityRoutes);
+
+// /api/tasks/:taskId/comments
+app.use('/api/tasks/:taskId/comments', commentRoutes);
 
 // Mongoose connection
 mongoose

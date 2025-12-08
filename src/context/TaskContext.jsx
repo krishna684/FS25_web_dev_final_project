@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import axiosClient from "../api/axiosClient";
+import taskApi from "../api/tasks";
 
 const TaskContext = createContext(null);
 
@@ -10,11 +10,10 @@ export const TaskProvider = ({ children }) => {
   const fetchTasks = async () => {
     setLoading(true);
     try {
-      const res = await axiosClient.get("/tasks");
+      const res = await taskApi.getAll();
       setTasks(res.data);
     } catch (err) {
-      console.error("Failed to load tasks from backend, leaving current state", err);
-      // you can optionally set mock tasks here
+      console.error("Failed to load tasks", err);
     } finally {
       setLoading(false);
     }
@@ -26,7 +25,7 @@ export const TaskProvider = ({ children }) => {
 
   const addTask = async ({ title, dueDate }) => {
     try {
-      const res = await axiosClient.post("/tasks", { title, dueDate });
+      const res = await taskApi.create({ title, dueDate });
       setTasks((prev) => [res.data, ...prev]);
     } catch (err) {
       console.error("Failed to create task", err);
@@ -34,14 +33,17 @@ export const TaskProvider = ({ children }) => {
   };
 
   const toggleTask = async (taskId) => {
-    const existing = tasks.find((t) => t.id === taskId);
+    const existing = tasks.find((t) => t._id === taskId);
     if (!existing) return;
 
     try {
-      const res = await axiosClient.put(`/tasks/${taskId}`, {
-        completed: !existing.completed,
+      // Toggle based on status: if 'done', set to 'todo', otherwise set to 'done'
+      const newStatus = existing.status === 'done' ? 'todo' : 'done';
+      const res = await taskApi.update(taskId, {
+        status: newStatus,
+        completed: newStatus === 'done' // This triggers backend completion logic
       });
-      setTasks((prev) => prev.map((t) => (t.id === taskId ? res.data : t)));
+      setTasks((prev) => prev.map((t) => (t._id === taskId ? res.data : t)));
     } catch (err) {
       console.error("Failed to toggle task", err);
     }
@@ -49,8 +51,8 @@ export const TaskProvider = ({ children }) => {
 
   const deleteTask = async (taskId) => {
     try {
-      await axiosClient.delete(`/tasks/${taskId}`);
-      setTasks((prev) => prev.filter((t) => t.id !== taskId));
+      await taskApi.delete(taskId);
+      setTasks((prev) => prev.filter((t) => t._id !== taskId));
     } catch (err) {
       console.error("Failed to delete task", err);
     }

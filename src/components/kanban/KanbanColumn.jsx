@@ -6,7 +6,7 @@ const KanbanColumn = ({ title, tasks, onCardClick }) => {
       <h3>{title}</h3>
       <div className="kanban-column-body">
         {tasks.map((t) => (
-          <KanbanCard key={t.id} task={t} onClick={onCardClick} />
+          <KanbanCard key={t._id} task={t} onClick={onCardClick} />
         ))}
       </div>
     </div>

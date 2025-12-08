@@ -1,27 +1,53 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import notificationApi from "../../api/notifications";
 import NotificationDropdown from "./NotificationDropdown";
+import { Bell } from "lucide-react";
 
 const NotificationBell = () => {
   const [open, setOpen] = useState(false);
-  // Placeholder; later fetch from API
-  const notifications = [
-    { id: 1, text: "Task 'API integration' assigned to you.", unread: true },
-    { id: 2, text: "Team 'CS Project' created.", unread: false },
-  ];
+  const [notifications, setNotifications] = useState([]);
 
-  const unreadCount = notifications.filter((n) => n.unread).length;
+  const loadNotifications = async () => {
+    try {
+      const res = await notificationApi.getAll();
+      setNotifications(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    loadNotifications();
+    const interval = setInterval(loadNotifications, 30000); // Poll every 30s
+    return () => clearInterval(interval);
+  }, []);
+
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   return (
-    <div className="notification-bell">
+    <div className="notification-bell relative">
       <button
-        className="icon-button"
+        className="p-2 rounded-full hover:bg-gray-100 transition-colors relative text-gray-600"
         type="button"
         onClick={() => setOpen((o) => !o)}
       >
-        🔔
-        {unreadCount > 0 && <span className="badge">{unreadCount}</span>}
+        <Bell size={20} />
+        {unreadCount > 0 && (
+          <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm ring-2 ring-white">
+            {unreadCount}
+          </span>
+        )}
       </button>
-      {open && <NotificationDropdown notifications={notifications} />}
+
+      {open && (
+        <div className="absolute right-0 top-full mt-2 z-50">
+          <NotificationDropdown
+            notifications={notifications}
+            onClose={() => setOpen(false)}
+            onRefresh={loadNotifications}
+          />
+        </div>
+      )}
     </div>
   );
 };

@@ -1,49 +1,113 @@
-// src/pages/TasksPage.jsx
-import { useMemo, useState } from "react";
-import TaskForm from "../components/tasks/TaskForm";
-import TaskFilters from "../components/tasks/TaskFilters";
-import TaskList from "../components/tasks/TaskList";
-import { useTasks } from "../context/TaskContext";
+import { useEffect, useState } from "react";
+import teamApi from "../api/teams";
+import { Link } from "react-router-dom";
 
-const TasksPage = () => {
-  const { tasks, addTask, toggleTask, deleteTask } = useTasks();
-  const [filters, setFilters] = useState({ status: "all", search: "" });
+const TeamsPage = () => {
+  const [teams, setTeams] = useState([]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const handleCreate = ({ title, dueDate }) => {
-    addTask({ title, dueDate });
+  // Create team form
+  const [newTeamName, setNewTeamName] = useState("");
+  const [inviteCode, setInviteCode] = useState("");
+
+  const loadTeams = async () => {
+    try {
+      setLoading(true);
+      const res = await teamApi.getAll();
+      setTeams(res.data);
+      setLoading(false);
+    } catch (err) {
+      setError("Failed to load teams.");
+      setLoading(false);
+    }
   };
 
-  const handleToggle = (task) => {
-    toggleTask(task.id);
+  useEffect(() => {
+    loadTeams();
+  }, []);
+
+  const handleCreateTeam = async (e) => {
+    e.preventDefault();
+    try {
+      await teamApi.create({ name: newTeamName });
+      setNewTeamName("");
+      loadTeams();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to create team");
+    }
   };
 
-  const handleDelete = (task) => {
-    deleteTask(task.id);
+  const handleJoinTeam = async (e) => {
+    e.preventDefault();
+    try {
+      await teamApi.join(inviteCode);
+      setInviteCode("");
+      loadTeams();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to join team (check code)");
+    }
   };
 
-  const filteredTasks = useMemo(() => {
-    return tasks.filter((t) => {
-      const matchesStatus =
-        filters.status === "all" ? true : t.status === filters.status;
-      const matchesSearch = t.title
-        .toLowerCase()
-        .includes(filters.search.toLowerCase());
-      return matchesStatus && matchesSearch;
-    });
-  }, [tasks, filters]);
+  if (loading) return <div>Loading teams...</div>;
 
   return (
     <div>
-      <h2>My Tasks</h2>
-      <TaskFilters filters={filters} onChange={setFilters} />
-      <TaskForm onSubmit={handleCreate} />
-      <TaskList
-        tasks={filteredTasks}
-        onToggle={handleToggle}
-        onDelete={handleDelete}
-      />
+      <h2 className="page-title">My Teams</h2>
+      {error && <p className="error">{error}</p>}
+
+      <div className="teams-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+
+        {/* List Teams */}
+        <div>
+          <h3>Your Teams</h3>
+          {teams.length === 0 ? <p>You are not in any teams.</p> : (
+            <ul className="team-list">
+              {teams.map(team => (
+                <li key={team._id} style={{ border: '1px solid #ccc', padding: '10px', margin: '10px 0' }}>
+                  <Link to={`/teams/${team._id}`}><strong>{team.name}</strong></Link>
+                  <p>{team.members?.length} members</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div>
+          <div className="card">
+            <h3>Create New Team</h3>
+            <form onSubmit={handleCreateTeam}>
+              <input
+                type="text"
+                placeholder="Team Name"
+                value={newTeamName}
+                onChange={e => setNewTeamName(e.target.value)}
+                required
+              />
+              <button type="submit" className="btn-primary" style={{ marginTop: '0.5rem' }}>Create</button>
+            </form>
+          </div>
+
+          <div className="card" style={{ marginTop: '1rem' }}>
+            <h3>Join Team</h3>
+            <form onSubmit={handleJoinTeam}>
+              <input
+                type="text"
+                placeholder="Invite Code"
+                value={inviteCode}
+                onChange={e => setInviteCode(e.target.value)}
+                required
+              />
+              <button type="submit" className="btn-secondary" style={{ marginTop: '0.5rem' }}>Join</button>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
 
-export default TasksPage;
+export default TeamsPage;
