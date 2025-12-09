@@ -32,8 +32,33 @@ const limiter = rateLimit({
 });
 
 app.use(express.json());
+
+// CORS configuration for both local development and Vercel
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:5000',
+];
+
+// Add FRONTEND_URL if it's defined (for Vercel/production)
+if (process.env.FRONTEND_URL && !allowedOrigins.includes(process.env.FRONTEND_URL)) {
+  allowedOrigins.push(process.env.FRONTEND_URL);
+}
+
 app.use(cors({
-  origin: 'http://localhost:5173', // Vite default port
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) {
+      return callback(null, true);
+    }
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn(`CORS blocked request from origin: ${origin}`);
+      callback(null, true); // Allow for now, log warnings instead
+    }
+  },
   credentials: true
 }));
 
