@@ -82,7 +82,9 @@ const LoginPage = () => {
       navigate("/dashboard");
     } catch (err) {
       console.error("Login failed", err);
-      setError("Invalid credentials. Please try again.");
+      // Fallback to err.message for timeout errors
+      const msg = err.response?.data?.error || err.message || "Invalid credentials. Please try again.";
+      setError(msg);
     } finally {
       setIsLoading(false);
     }

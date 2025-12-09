@@ -148,7 +148,7 @@ const SignupPage = () => {
       navigate("/welcome"); // Navigate to welcome page instead of dashboard
     } catch (err) {
       console.error("Signup failed", err);
-      const msg = err.response?.data?.error || "Failed to create account.";
+      const msg = err.response?.data?.error || err.message || "Failed to create account.";
       setError(msg);
     } finally {
       setIsLoading(false);
@@ -265,8 +265,8 @@ const SignupPage = () => {
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm text-gray-600">Password strength:</span>
                   <span className={`text-sm font-medium ${checkPasswordStrength(form.password).level === 'weak' ? 'text-red-500' :
-                      checkPasswordStrength(form.password).level === 'medium' ? 'text-yellow-500' :
-                        'text-green-500'
+                    checkPasswordStrength(form.password).level === 'medium' ? 'text-yellow-500' :
+                      'text-green-500'
                     }`}>
                     {checkPasswordStrength(form.password).text}
                   </span>
@@ -274,8 +274,8 @@ const SignupPage = () => {
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className={`h-2 rounded-full transition-all duration-300 ${checkPasswordStrength(form.password).level === 'weak' ? 'bg-red-500 w-1/3' :
-                        checkPasswordStrength(form.password).level === 'medium' ? 'bg-yellow-500 w-2/3' :
-                          'bg-green-500 w-full'
+                      checkPasswordStrength(form.password).level === 'medium' ? 'bg-yellow-500 w-2/3' :
+                        'bg-green-500 w-full'
                       }`}
                   ></div>
                 </div>
