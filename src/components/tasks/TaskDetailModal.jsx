@@ -47,11 +47,11 @@ const TaskDetailModal = ({ task, isOpen, onClose, onUpdate, onDelete }) => {
             {/* Modal */}
             <div className="fixed inset-0 flex items-center justify-center p-4 z-50 pointer-events-none">
                 <div
-                    className="bg-[var(--bg-surface)] rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto pointer-events-auto"
+                    className="bg-white dark:bg-[var(--bg-surface)] rounded-xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto pointer-events-auto"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Header */}
-                    <div className="sticky top-0 bg-[var(--bg-surface)] border-b border-[var(--border)] p-6 flex items-start justify-between">
+                    <div className="sticky top-0 bg-white dark:bg-[var(--bg-surface)] border-b border-[var(--border)] p-6 flex items-start justify-between">
                         <div className="flex-1">
                             {isEditing ? (
                                 <input
@@ -100,10 +100,10 @@ const TaskDetailModal = ({ task, isOpen, onClose, onUpdate, onDelete }) => {
                                 <Clock size={16} className="text-[var(--text-secondary)]" />
                                 <span className="text-sm text-[var(--text-secondary)]">Status:</span>
                                 <span className={`text-sm font-medium px-2 py-1 rounded ${task.status === 'done'
-                                        ? 'bg-green-100 text-green-700 dark:bg-green-900/20'
-                                        : task.status === 'in-progress'
-                                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/20'
-                                            : 'bg-gray-100 text-gray-700 dark:bg-gray-800'
+                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/20'
+                                    : task.status === 'in-progress'
+                                        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/20'
+                                        : 'bg-gray-100 text-gray-700 dark:bg-gray-800'
                                     }`}>
                                     {task.status || 'To Do'}
                                 </span>

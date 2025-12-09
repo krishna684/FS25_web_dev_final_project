@@ -341,7 +341,7 @@ const TasksPage = () => {
                       : "Create your first task to get started!"
                   }
                   actionLabel="Create Task"
-                  onAction={() => document.querySelector('input[name="title"]')?.focus()}
+                  onAction={() => setShowNewTaskModal(true)}
                   variant="info"
                 />
               )}
