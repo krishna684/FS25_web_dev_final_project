@@ -23,12 +23,14 @@ export const TaskProvider = ({ children }) => {
     fetchTasks();
   }, []);
 
-  const addTask = async ({ title, dueDate }) => {
+  const addTask = async (taskData) => {
     try {
-      const res = await taskApi.create({ title, dueDate });
+      const res = await taskApi.create({ ...taskData, isTeamTask: false });
       setTasks((prev) => [res.data, ...prev]);
+      return res.data;
     } catch (err) {
       console.error("Failed to create task", err);
+      throw err;
     }
   };
 

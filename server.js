@@ -85,14 +85,39 @@ app.use('/api/activity', activityRoutes);
 app.use('/api/tasks/:taskId/comments', commentRoutes);
 
 // Mongoose connection
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => console.log('MongoDB Connected'))
-  .catch(err => console.error('Error connecting to MongoDB:', err));
+const mongooseOptions = {
+  maxPoolSize: 10,
+  serverSelectionTimeoutMS: 5000,
+};
+
+mongoose.connection.on('disconnected', () => {
+  console.warn('MongoDB disconnected');
+});
+
+mongoose.connection.on('error', err => {
+  console.error('MongoDB connection error:', err);
+});
+
+async function startServer() {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI, mongooseOptions);
+    console.log('MongoDB Connected');
+
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  } catch (err) {
+    console.error('Error connecting to MongoDB:', err);
+    process.exit(1);
+  }
+}
 
 app.get('/', (req, res) => {
   res.send('Backend running');
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+startServer();
+
+process.on('SIGINT', async () => {
+  await mongoose.connection.close();
+  process.exit(0);
+});

@@ -36,8 +36,12 @@ const TasksPage = () => {
   const [bulkMode, setBulkMode] = useState(false);
 
   const handleCreate = async (formData) => {
-    await addTask(formData);
-    setShowNewTaskModal(false);
+    try {
+      await addTask(formData);
+      setShowNewTaskModal(false);
+    } catch (error) {
+      console.error("Failed to create task", error);
+    }
   };
 
   const handleTaskClick = (task) => {
@@ -387,6 +391,14 @@ const TasksPage = () => {
             </button>
           </div>
         </div>
+      )}
+
+      {/* New Task Modal */}
+      {showNewTaskModal && (
+        <NewTaskModal
+          onClose={() => setShowNewTaskModal(false)}
+          onCreate={handleCreate}
+        />
       )}
 
       {/* Task Detail Modal */}

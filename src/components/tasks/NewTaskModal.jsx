@@ -28,7 +28,7 @@ const NewTaskModal = ({ onClose, onCreate, teamId = null }) => {
     };
 
     return (
-        <div className="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
             <div className="modal-content bg-white dark:bg-[var(--bg-surface)] w-full max-w-lg rounded-xl shadow-2xl animate-slideUp">
                 {/* Header */}
                 <div className="p-6 border-b border-[var(--border)]">

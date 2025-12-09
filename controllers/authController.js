@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 exports.registerUser = async (req, res) => {
     try {
         const { name, email, password } = req.body;
+        const normalizedEmail = email?.toLowerCase().trim();
 
         // Validation
         if (!name || !email || !password) {
@@ -25,7 +26,7 @@ exports.registerUser = async (req, res) => {
         }
 
         // Check if user exists
-        const existingUser = await User.findOne({ email });
+        const existingUser = await User.findOne({ email: normalizedEmail });
         if (existingUser) {
             return res.status(409).json({ error: 'Email already registered' });
         }
@@ -37,7 +38,7 @@ exports.registerUser = async (req, res) => {
         // Create user
         const newUser = new User({
             name,
-            email,
+            email: normalizedEmail,
             passwordHash,
         });
 
@@ -73,13 +74,14 @@ exports.registerUser = async (req, res) => {
 exports.loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
+        const normalizedEmail = email?.toLowerCase().trim();
 
         if (!email || !password) {
             return res.status(400).json({ error: 'Email and password are required' });
         }
 
         // Find user
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email: normalizedEmail });
         if (!user) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }

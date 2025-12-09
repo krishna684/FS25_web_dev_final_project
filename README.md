@@ -30,31 +30,32 @@
 
 ## 📦 Installation & Setup
 
-1.  **Clone the Repository**
-    ```bash
-    git clone https://github.com/yourusername/taskflow.git
-    cd taskflow
-    ```
+Follow these steps whether you unzipped a download or cloned the repo.
 
-2.  **Install Dependencies**
-    ```bash
-    npm install
-    ```
+1) **Get the code**
+   - If cloned: `git clone https://github.com/yourusername/taskflow.git && cd taskflow`
+   - If unzipped: open a terminal in the extracted folder (it should contain `package.json`).
 
-3.  **Environment Configuration**
-    Create a `.env` file in the root directory based on `.env.example`:
-    ```env
-    PORT=5000
-    MONGODB_URI=mongodb://127.0.0.1:27017/taskflow
-    JWT_SECRET=your_super_secret_key_123
-    NODE_ENV=development
-    ```
+2) **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-4.  **Seed the Database** (Optional but recommended for testing)
-    Populate the database with test users, teams, and tasks:
-    ```bash
-    npm run seed
-    ```
+3) **Add environment file**
+   Create a `.env` in the project root:
+   ```env
+   PORT=5000
+   MONGODB_URI=mongodb://127.0.0.1:27017/taskflow
+   JWT_SECRET=your_super_secret_key_123
+   NODE_ENV=development
+   ```
+   For the frontend, Vite will auto-fallback to `http://localhost:5000/api`. If you need to override, add `VITE_API_URL=http://localhost:5000/api` to the same `.env`.
+
+4) **Seed the database (optional, recommended)**
+   ```bash
+   npm run seed
+   ```
+   Seeds users: alice@example.com, bob@example.com, charlie@example.com (password: `Password123!`).
 
 ## 🏃‍♂️ Running the Application
 
@@ -66,6 +67,13 @@ npm run dev
 
 - **Frontend**: http://localhost:5173
 - **Backend API**: http://localhost:5000
+
+Backend only (useful when deploying separately):
+```bash
+npm start
+```
+
+If the backend is on another host/port, set `VITE_API_URL` to that `https://your-host/api` before running the frontend.
 
 ## 🧪 Verification
 
