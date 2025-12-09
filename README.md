@@ -55,7 +55,15 @@ Follow these steps whether you unzipped a download or cloned the repo.
    ```bash
    npm run seed
    ```
-   Seeds users: alice@example.com, bob@example.com, charlie@example.com (password: `Password123!`).
+   Seeds 6 test users with realistic data:
+   - `alice@example.com` - Team owner with multiple teams
+   - `bob@example.com` - Member of Web Dev and Data Science teams
+   - `charlie@example.com` - Member of Web Dev team
+   - `david@example.com` - Team owner and member
+   - `emma@example.com` - Mobile team owner
+   - `frank@example.com` - Mobile team member
+   
+   **All passwords**: `Password123!`
 
 ## 🏃‍♂️ Running the Application
 
@@ -74,6 +82,17 @@ npm start
 ```
 
 If the backend is on another host/port, set `VITE_API_URL` to that `https://your-host/api` before running the frontend.
+
+### Vercel environment (copy/paste)
+Set these in Vercel → Project → Settings → Environment Variables. Update the Mongo URI and secret with your values; the domain below matches your deployment.
+
+```env
+MONGODB_URI=your-mongodb-connection-string
+JWT_SECRET=replace-with-strong-secret
+NODE_ENV=production
+VITE_API_URL=https://team-taskflow.netlify.app/api
+FRONTEND_URL=https://team-taskflow.netlify.app
+```
 
 ## 🧪 Verification
 
