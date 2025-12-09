@@ -6,6 +6,7 @@ import activityApi from "../api/activity";
 import KanbanBoard from "../components/kanban/KanbanBoard";
 import TeamMembers from "../components/teams/TeamMembers";
 import InviteMemberModal from "../components/teams/InviteMemberModal";
+import NewTaskModal from "../components/tasks/NewTaskModal";
 import ActivityFeed from "../components/activity/ActivityFeed";
 import CommentList from "../components/comments/CommentList";
 import CommentForm from "../components/comments/CommentForm";
@@ -173,7 +174,7 @@ const TeamBoardPage = () => {
           <div className="max-w-4xl mx-auto">
             <div className="card">
               <h3 className="card-title mb-4">Team Members</h3>
-              <TeamMembers members={members} />
+              <TeamMembers team={team} onTeamUpdate={loadTeam} />
             </div>
           </div>
         )}
@@ -298,134 +299,6 @@ const TeamBoardPage = () => {
           onCreate={handleCreateTask}
         />
       )}
-    </div>
-  );
-};
-
-// New Task Modal Component
-const NewTaskModal = ({ teamId, onClose, onCreate }) => {
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    status: 'todo',
-    priority: 'medium',
-    dueDate: ''
-  });
-  const [creating, setCreating] = useState(false);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.title.trim()) return;
-
-    setCreating(true);
-    try {
-      await onCreate(formData);
-    } catch (error) {
-      console.error('Failed to create task:', error);
-    } finally {
-      setCreating(false);
-    }
-  };
-
-  return (
-    <div className="modal fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="modal-content bg-white dark:bg-[var(--bg-surface)] w-full max-w-lg rounded-xl shadow-2xl">
-        {/* Header */}
-        <div className="p-6 border-b border-[var(--border)]">
-          <div className="flex justify-between items-center">
-            <h3 className="text-xl font-bold text-[var(--text-main)]">Create New Task</h3>
-            <button
-              onClick={onClose}
-              className="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-1"
-            >
-              <X size={24} />
-            </button>
-          </div>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div className="form-group">
-            <label className="form-label">Task Title *</label>
-            <input
-              type="text"
-              className="form-input"
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-              placeholder="Enter task title"
-              required
-              autoFocus
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Description</label>
-            <textarea
-              className="form-input min-h-[100px]"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Add task description..."
-              rows={3}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div className="form-group">
-              <label className="form-label">Status</label>
-              <select
-                className="form-input"
-                value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-              >
-                <option value="todo">To Do</option>
-                <option value="in-progress">In Progress</option>
-                <option value="done">Done</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Priority</label>
-              <select
-                className="form-input"
-                value={formData.priority}
-                onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-              >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">Due Date</label>
-            <input
-              type="date"
-              className="form-input"
-              value={formData.dueDate}
-              onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-            />
-          </div>
-
-          {/* Actions */}
-          <div className="flex justify-end gap-3 pt-4">
-            <button
-              type="button"
-              onClick={onClose}
-              className="btn btn-ghost"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={creating || !formData.title.trim()}
-              className="btn btn-primary"
-            >
-              {creating ? 'Creating...' : 'Create Task'}
-            </button>
-          </div>
-        </form>
-      </div>
     </div>
   );
 };

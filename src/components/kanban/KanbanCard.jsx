@@ -35,7 +35,24 @@ const KanbanCard = ({ task, onClick }) => {
       onClick={() => onClick?.(task)}
     >
       <div className="kanban-card-header">
-        <h4 className="kanban-card-title">{task.title}</h4>
+        <div className="flex items-start justify-between gap-2">
+          <h4 className="kanban-card-title flex-1">{task.title}</h4>
+          {/* Priority Badge Dot */}
+          {task.priority && (
+            <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 mt-1.5 ${task.priority === 'high' ? 'bg-red-500' :
+                task.priority === 'medium' ? 'bg-yellow-500' :
+                  'bg-green-500'
+              }`} title={`Priority: ${task.priority}`}></div>
+          )}
+        </div>
+
+        {/* Description Preview */}
+        {task.description && (
+          <p className="kanban-card-description text-xs text-gray-600 dark:text-gray-400 mt-1.5 line-clamp-2">
+            {task.description}
+          </p>
+        )}
+
         {task.tags && task.tags.length > 0 && (
           <div className="kanban-card-tags">
             {task.tags.slice(0, 2).map((tag, index) => (
@@ -101,4 +118,3 @@ const KanbanCard = ({ task, onClick }) => {
 };
 
 export default KanbanCard;
-  

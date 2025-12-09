@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
-import TaskForm from "../components/tasks/TaskForm";
 import TaskCard from "../components/tasks/TaskCard";
 import TaskDetailModal from "../components/tasks/TaskDetailModal";
+import NewTaskModal from "../components/tasks/NewTaskModal";
 import EmptyState from "../components/common/EmptyState";
 import { useTasks } from "../context/TaskContext";
 import { Filter, Calendar, List as ListIcon, Search, Plus, X, CheckCircle } from "lucide-react";
@@ -28,12 +28,16 @@ const TasksPage = () => {
   const [selectedTask, setSelectedTask] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // New Task Modal State
+  const [showNewTaskModal, setShowNewTaskModal] = useState(false);
+
   // Bulk Actions State
   const [selectedTaskIds, setSelectedTaskIds] = useState([]);
   const [bulkMode, setBulkMode] = useState(false);
 
-  const handleCreate = ({ title, dueDate }) => {
-    addTask({ title, dueDate });
+  const handleCreate = async (formData) => {
+    await addTask(formData);
+    setShowNewTaskModal(false);
   };
 
   const handleTaskClick = (task) => {
@@ -245,6 +249,16 @@ const TasksPage = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* New Task Button */}
+            <button
+              onClick={() => setShowNewTaskModal(true)}
+              className="btn btn-primary gap-2"
+              title="Create New Task"
+            >
+              <Plus size={18} />
+              New Task
+            </button>
+
             {/* Search */}
             <div className="relative">
               <Search size={16} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -298,10 +312,6 @@ const TasksPage = () => {
 
           {viewMode === 'list' && (
             <>
-              <div className="mb-4">
-                <TaskForm onSubmit={handleCreate} />
-              </div>
-
               {/* Task Cards Grid */}
               {filteredTasks.length > 0 ? (
                 <div className="space-y-3">
