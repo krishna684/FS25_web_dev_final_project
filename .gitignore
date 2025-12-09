@@ -23,6 +23,9 @@ lerna-debug.log*
 # Node
 node_modules/
 
+# AI Generated Documentation
+AI_GENERATED_DOCS/
+
 # Dependency directories
 jspm_packages/
 

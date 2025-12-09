@@ -27,14 +27,16 @@ const NotificationBell = () => {
   return (
     <div className="notification-bell relative">
       <button
-        className="p-2 rounded-full hover:bg-gray-100 transition-colors relative text-gray-600"
+        className="p-2 rounded-lg hover:bg-[var(--bg-body)] transition-all duration-200 relative text-[var(--text-secondary)] hover:text-[var(--text-main)] group hover:shadow-sm"
         type="button"
         onClick={() => setOpen((o) => !o)}
+        aria-label="Notifications"
+        title={unreadCount > 0 ? `${unreadCount} unread notification${unreadCount > 1 ? 's' : ''}` : 'Notifications'}
       >
-        <Bell size={20} />
+        <Bell size={18} className="transition-transform duration-200 group-hover:scale-110" />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-sm ring-2 ring-white">
-            {unreadCount}
+          <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-md ring-2 ring-white dark:ring-gray-800 animate-pulse">
+            {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </button>

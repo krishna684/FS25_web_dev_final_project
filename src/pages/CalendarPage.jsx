@@ -57,16 +57,16 @@ const CalendarPage = () => {
     viewMode === "day"
       ? "Day View"
       : viewMode === "three-day"
-      ? "Three Day View"
-      : viewMode === "work-week"
-      ? "Work Week View"
-      : viewMode === "week"
-      ? "Week View"
-      : viewMode === "list"
-      ? "List"
-      : viewMode === "time-zones"
-      ? "Manage Additional Time Zones"
-      : "Month View";
+        ? "Three Day View"
+        : viewMode === "work-week"
+          ? "Work Week View"
+          : viewMode === "week"
+            ? "Week View"
+            : viewMode === "list"
+              ? "List"
+              : viewMode === "time-zones"
+                ? "Manage Additional Time Zones"
+                : "Month View";
 
   return (
     <div>
@@ -105,6 +105,7 @@ const CalendarPage = () => {
 
       <CalendarView
         currentMonth={currentMonth}
+        tasks={tasks}
         events={combinedEvents}
         viewMode={viewMode}
         timeZone={timeZone}

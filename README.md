@@ -77,7 +77,41 @@ node verify_search_feature.js
 
 ## 📖 Documentation
 
-- [Database Architecture](docs/DATABASE_ARCHITECTURE.md) - Detailed schema information.
+- **[Database Architecture](docs/DATABASE_ARCHITECTURE.md)** - Detailed schema information
+- **[Design System v2.0](docs/DESIGN_SYSTEM_V2.md)** - Complete design system documentation
+- **[Design Quick Start](docs/DESIGN_SYSTEM_QUICK_START.md)** - Quick reference for using the design system
+- **[Phase 9 Completion](docs/PHASE_9_COMPLETION.md)** - Polish & micro-interactions documentation
+- **[Color Palette Guide](docs/COLOR_PALETTE_GUIDE.md)** - Color usage and psychology
+- **[Setup Instructions](SETUP_INSTRUCTIONS.md)** - Installation and deployment guide
+
+## 🎨 Design System
+
+TaskFlow features a professional design system v2.0 with:
+- **Refined Color Palette**: Professional blue (#2563EB), refined green (#10B981), team purple (#8B5CF6)
+- **Typography System**: Inter font with 6-level hierarchy (H1-Caption)
+- **8px Grid System**: Consistent spacing throughout
+- **Component Library**: Enhanced buttons, cards, forms with hover/focus/error states
+- **Dark Mode**: Smooth transitions with high-contrast colors
+- **Accessibility**: WCAG AA compliant contrast ratios
+
+See [Design System Quick Start](docs/DESIGN_SYSTEM_QUICK_START.md) for usage examples.
+
+## ✨ Polish & Micro-interactions (Phase 9)
+
+TaskFlow includes enterprise-grade polish with:
+- **Toast Notifications**: 4 variants (success, error, warning, info) with auto-dismiss
+- **Skeleton Loaders**: 5 variants for smooth async loading states
+- **Page Transitions**: Smooth fade-in animations on page load
+- **Enhanced Focus States**: WCAG 2.1 AA compliant keyboard navigation
+- **Loading States**: Spinner animations in buttons for async operations
+- **Smooth Scroll**: Native smooth scrolling for anchor links
+- **Micro-interactions**: Ripple effects, hover lifts, stagger animations
+- **Empty States**: Contextual messages for empty lists
+- **Skip-to-Content**: Screen reader accessibility link
+
+All animations run at 60fps with proper fallbacks for `prefers-reduced-motion`.
+
+See [Phase 9 Completion](docs/PHASE_9_COMPLETION.md) for detailed documentation.
 
 ## 📄 License
 

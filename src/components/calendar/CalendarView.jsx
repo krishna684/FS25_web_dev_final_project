@@ -21,11 +21,13 @@ const US_TIMEZONES = [
 const CalendarView = ({
   currentMonth,
   events = [],
+  tasks = [], // NEW: Accept tasks array
   viewMode = "month",
   timeZone = "America/Chicago",
   onNewEvent,
   onChangeView,
   onChangeTimeZone,
+  onTaskClick, // NEW: Handle task clicks
 }) => {
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
@@ -47,6 +49,16 @@ const CalendarView = ({
 
   const todayKey = dateKey(new Date());
 
+  // Map tasks by due date (NEW)
+  const tasksByDate = tasks.reduce((acc, task) => {
+    if (!task.dueDate) return acc;
+    const key = task.dueDate.split('T')[0]; // YYYY-MM-DD
+    if (!acc[key]) acc[key] = [];
+    acc[key].push(task);
+    return acc;
+  }, {});
+
+  // Keep existing events mapping
   const eventsByDate = events.reduce((acc, ev) => {
     const key = ev.date;
     if (!acc[key]) acc[key] = [];
@@ -78,6 +90,13 @@ const CalendarView = ({
       y: event.clientY,
       date,
     });
+  };
+
+  const handleDayClick = (date) => {
+    // Handle date click - could navigate to day view or show tasks for that date
+    setAnchorDate(date);
+    // For now, just switch to day view
+    onChangeView && onChangeView("day");
   };
 
   // ===== LIST VIEW =====
@@ -219,9 +238,8 @@ const CalendarView = ({
             {US_TIMEZONES.map((tz) => (
               <button
                 key={tz.tz}
-                className={`calendar-timezone-chip ${
-                  tz.tz === timeZone ? "active" : ""
-                }`}
+                className={`calendar-timezone-chip ${tz.tz === timeZone ? "active" : ""
+                  }`}
                 onClick={(e) => {
                   e.stopPropagation();
                   onChangeTimeZone && onChangeTimeZone(tz.tz);
@@ -252,14 +270,15 @@ const CalendarView = ({
               const inCurrentMonth = date.getMonth() === month;
               const isToday = key === todayKey;
               const dayEvents = eventsByDate[key] || [];
+              const dayTasks = tasksByDate[key] || [];
 
               return (
                 <div
                   key={key}
-                  className={`calendar-day ${
-                    inCurrentMonth ? "" : "calendar-day-outside"
-                  } ${isToday ? "calendar-day-today" : ""}`}
+                  className={`calendar-day ${inCurrentMonth ? "" : "calendar-day-outside"
+                    } ${isToday ? "calendar-day-today" : ""}`}
                   onContextMenu={(e) => handleDayContextMenu(e, date)}
+                  onClick={() => onTaskClick && onTaskClick(date)}
                 >
                   <div className="calendar-day-number">{date.getDate()}</div>
 
@@ -273,6 +292,20 @@ const CalendarView = ({
                         )}
                         <span className="calendar-event-title">
                           {ev.title}
+                        </span>
+                      </div>
+                    ))}
+                    {dayTasks.map((task) => (
+                      <div
+                        key={`task-${task.id}`}
+                        className={`calendar-task calendar-task-${task.priority}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onTaskClick && onTaskClick(task);
+                        }}
+                      >
+                        <span className="calendar-task-title">
+                          {task.title}
                         </span>
                       </div>
                     ))}
@@ -309,14 +342,15 @@ const CalendarView = ({
               const key = dateKey(date);
               const isToday = key === todayKey;
               const dayEvents = eventsByDate[key] || [];
+              const dayTasks = tasksByDate[key] || [];
 
               return (
                 <div
                   key={key}
-                  className={`calendar-day ${
-                    isToday ? "calendar-day-today" : ""
-                  }`}
+                  className={`calendar-day ${isToday ? "calendar-day-today" : ""
+                    }`}
                   onContextMenu={(e) => handleDayContextMenu(e, date)}
+                  onClick={() => handleDayClick(date)}
                 >
                   <div className="calendar-day-number">{date.getDate()}</div>
                   <div className="calendar-day-events">
@@ -329,6 +363,20 @@ const CalendarView = ({
                         )}
                         <span className="calendar-event-title">
                           {ev.title}
+                        </span>
+                      </div>
+                    ))}
+                    {dayTasks.map((task) => (
+                      <div
+                        key={`task-${task.id}`}
+                        className={`calendar-task calendar-task-${task.priority}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onTaskClick && onTaskClick(task);
+                        }}
+                      >
+                        <span className="calendar-task-title">
+                          {task.title}
                         </span>
                       </div>
                     ))}

@@ -1,8 +1,10 @@
 import { useMemo, useState } from "react";
 import TaskForm from "../components/tasks/TaskForm";
-import TaskList from "../components/tasks/TaskList";
+import TaskCard from "../components/tasks/TaskCard";
+import TaskDetailModal from "../components/tasks/TaskDetailModal";
+import EmptyState from "../components/common/EmptyState";
 import { useTasks } from "../context/TaskContext";
-import { Filter, Calendar, List as ListIcon, Search, Plus, X } from "lucide-react";
+import { Filter, Calendar, List as ListIcon, Search, Plus, X, CheckCircle } from "lucide-react";
 import CalendarView from "../components/calendar/CalendarView";
 
 const TasksPage = () => {
@@ -15,14 +17,79 @@ const TasksPage = () => {
   // Filter State
   const [filters, setFilters] = useState({
     status: "all",
-    priority: "all",
+    priority: [], // Array for multi-select checkboxes
     search: "",
     category: [],
-    dateRange: "all" // all | today | this-week
+    dateRange: "all", // all | today | this-week
+    sortBy: "dueDate" // dueDate | priority | created | title
   });
+
+  // Task Detail Modal State
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Bulk Actions State
+  const [selectedTaskIds, setSelectedTaskIds] = useState([]);
+  const [bulkMode, setBulkMode] = useState(false);
 
   const handleCreate = ({ title, dueDate }) => {
     addTask({ title, dueDate });
+  };
+
+  const handleTaskClick = (task) => {
+    if (bulkMode) {
+      // Toggle selection in bulk mode
+      setSelectedTaskIds(prev =>
+        prev.includes(task._id)
+          ? prev.filter(id => id !== task._id)
+          : [...prev, task._id]
+      );
+    } else {
+      setSelectedTask(task);
+      setIsModalOpen(true);
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedTaskIds.length === filteredTasks.length) {
+      setSelectedTaskIds([]);
+    } else {
+      setSelectedTaskIds(filteredTasks.map(t => t._id));
+    }
+  };
+
+  const handleBulkComplete = async () => {
+    for (const taskId of selectedTaskIds) {
+      await toggleTask(taskId);
+    }
+    setSelectedTaskIds([]);
+    setBulkMode(false);
+  };
+
+  const handleBulkDelete = async () => {
+    if (window.confirm(`Delete ${selectedTaskIds.length} selected tasks?`)) {
+      for (const taskId of selectedTaskIds) {
+        await deleteTask(taskId);
+      }
+      setSelectedTaskIds([]);
+      setBulkMode(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedTask(null);
+  };
+
+  const handleUpdateTask = async (updatedTask) => {
+    // Update task logic would go here
+    console.log("Update task:", updatedTask);
+    handleCloseModal();
+  };
+
+  const handleDeleteTask = async (taskId) => {
+    await deleteTask(taskId);
+    handleCloseModal();
   };
 
   const filteredTasks = useMemo(() => {
@@ -126,13 +193,33 @@ const TasksPage = () => {
             </div>
           </div>
 
-          {/* Priority Placeholder */}
-          <div className="mb-6 opacity-50 cursor-not-allowed">
-            <label className="text-xs font-semibold text-gray-500 mb-2 block">Priority (Coming Soon)</label>
-            <div className="flex gap-2">
-              <div className="w-3 h-3 rounded-full bg-red-500" title="High"></div>
-              <div className="w-3 h-3 rounded-full bg-yellow-500" title="Medium"></div>
-              <div className="w-3 h-3 rounded-full bg-blue-500" title="Low"></div>
+          {/* Priority Filter */}
+          <div className="mb-6">
+            <label className="text-xs font-semibold text-gray-500 mb-2 block">Priority</label>
+            <div className="flex flex-col gap-2">
+              {[
+                { id: 'high', label: 'High', color: 'bg-red-500' },
+                { id: 'medium', label: 'Medium', color: 'bg-yellow-500' },
+                { id: 'low', label: 'Low', color: 'bg-green-500' }
+              ].map(p => (
+                <label key={p.id} className="flex items-center gap-2 cursor-pointer hover:bg-gray-100 px-2 py-1 rounded transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={filters.priority.includes(p.id)}
+                    onChange={() => {
+                      setFilters(f => ({
+                        ...f,
+                        priority: f.priority.includes(p.id)
+                          ? f.priority.filter(pr => pr !== p.id)
+                          : [...f.priority, p.id]
+                      }));
+                    }}
+                    className="w-4 h-4"
+                  />
+                  <div className={`w-3 h-3 rounded-full ${p.color}`} />
+                  <span className="text-sm">{p.label}</span>
+                </label>
+              ))}
             </div>
           </div>
         </div>
@@ -214,11 +301,36 @@ const TasksPage = () => {
               <div className="mb-4">
                 <TaskForm onSubmit={handleCreate} />
               </div>
-              <TaskList
-                tasks={filteredTasks}
-                onToggle={toggleTask}
-                onDelete={deleteTask}
-              />
+
+              {/* Task Cards Grid */}
+              {filteredTasks.length > 0 ? (
+                <div className="space-y-3">
+                  {filteredTasks.map(task => (
+                    <TaskCard
+                      key={task._id}
+                      task={task}
+                      onToggle={toggleTask}
+                      onClick={handleTaskClick}
+                      onDelete={deleteTask}
+                      bulkMode={bulkMode}
+                      isSelected={selectedTaskIds.includes(task._id)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  icon={CheckCircle}
+                  title="No tasks found"
+                  description={
+                    filters.status !== 'all' || filters.search || filters.dateRange !== 'all'
+                      ? "Try adjusting your filters to see more tasks"
+                      : "Create your first task to get started!"
+                  }
+                  actionLabel="Create Task"
+                  onAction={() => document.querySelector('input[name="title"]')?.focus()}
+                  variant="info"
+                />
+              )}
             </>
           )}
 
@@ -226,13 +338,55 @@ const TasksPage = () => {
             <div className="bg-white rounded-lg shadow-sm p-4 h-full overflow-auto">
               <CalendarView
                 currentMonth={new Date()}
+                tasks={filteredTasks}
                 events={calendarEvents}
                 viewMode="month"
+                onTaskClick={handleTaskClick}
               />
             </div>
           )}
         </div>
       </div>
+
+      {/* Bulk Action Bar */}
+      {bulkMode && selectedTaskIds.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-4 rounded-lg shadow-2xl z-50 flex items-center gap-6 animate-slide-in-up">
+          <span className="font-semibold">{selectedTaskIds.length} task{selectedTaskIds.length !== 1 ? 's' : ''} selected</span>
+
+          <div className="flex gap-2">
+            <button
+              onClick={handleBulkComplete}
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-md text-sm font-medium transition-colors"
+            >
+              Complete All
+            </button>
+            <button
+              onClick={handleBulkDelete}
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-md text-sm font-medium transition-colors"
+            >
+              Delete All
+            </button>
+            <button
+              onClick={() => {
+                setSelectedTaskIds([]);
+                setBulkMode(false);
+              }}
+              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-md text-sm font-medium transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Task Detail Modal */}
+      <TaskDetailModal
+        task={selectedTask}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onUpdate={handleUpdateTask}
+        onDelete={handleDeleteTask}
+      />
     </div>
   );
 };

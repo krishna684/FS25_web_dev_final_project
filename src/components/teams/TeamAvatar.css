@@ -1,0 +1,20 @@
+/* TeamAvatar.css */
+
+.team-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  color: white;
+  font-weight: var(--weight-bold);
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  user-select: none;
+  cursor: default;
+  transition: transform var(--transition-base), box-shadow var(--transition-base);
+}
+
+.team-avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}

@@ -1,24 +1,32 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import NotificationBell from "../notifications/NotificationBell";
-import { Search, Settings, Moon, Sun } from "lucide-react";
+import TeamsDropdown from "./TeamsDropdown";
+import NewButtonDropdown from "./NewButtonDropdown";
+import UserMenuDropdown from "./UserMenuDropdown";
 import SearchResults from "./SearchResults";
 import searchApi from "../../api/search";
-import { Link, useNavigate } from "react-router-dom";
+import { Search, Home, CheckSquare, Calendar, Moon, Sun, ArrowLeft, Grid, User } from "lucide-react";
+import Logo from "../common/Logo";
 
 const Navbar = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem("theme") === "dark";
   });
-
-  const navigate = useNavigate();
 
   // Search State
   const [query, setQuery] = useState("");
   const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  
+  const navCenterRef = useRef(null);
+  const navLeftRef = useRef(null);
+  const navRightRef = useRef(null);
 
   // Debounced Search
   useEffect(() => {
@@ -43,15 +51,14 @@ const Navbar = () => {
     return () => clearTimeout(timer);
   }, [query]);
 
-  // Click outside listener could be added here or handled by blur, 
-  // but for simplicity we rely on layout or close button.
-
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add("dark");
+      document.documentElement.setAttribute("data-theme", "dark");
       localStorage.setItem("theme", "dark");
     } else {
       document.documentElement.classList.remove("dark");
+      document.documentElement.setAttribute("data-theme", "light");
       localStorage.setItem("theme", "light");
     }
   }, [darkMode]);
@@ -61,69 +68,135 @@ const Navbar = () => {
     setQuery("");
   };
 
+  const handleMobileSearchOpen = () => {
+    setMobileSearchOpen(true);
+  };
+
+  const handleMobileSearchClose = () => {
+    setMobileSearchOpen(false);
+    setQuery("");
+    setShowResults(false);
+  };
+
+  const handleNewTask = () => {
+    navigate('/tasks');
+  };
+
+  const handleNewTeam = () => {
+    navigate('/teams');
+  };
+
   return (
-    <header className="navbar h-16 border-b border-[var(--border)] flex items-center justify-between px-6 bg-[var(--bg-surface)] z-20 sticky top-0 transition-colors duration-300">
-      {/* Left: Logo */}
-      <div className="navbar-left flex items-center gap-4">
-        <Link to="/dashboard" className="flex items-center gap-2 no-underline">
-          <div className="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center text-white font-bold shadow-sm">
-            TF
-          </div>
-          <span className="font-bold text-xl text-[var(--text-main)] tracking-tight">TaskFlow</span>
-        </Link>
-      </div>
+    <nav className="navbar bg-[var(--navbar-bg)] border-b-4 border-[var(--primary)] sticky top-0 z-50 shadow-md" style={{ transition: 'background-color 300ms cubic-bezier(0.4, 0, 0.2, 1)' }}>
+      <div className="container max-w-[1250px] mx-auto flex justify-between items-center px-3 py-3">
 
-      {/* Center: Search Bar */}
-      <div className="navbar-center flex-1 max-w-lg mx-8 hidden md:block">
-        <div className="relative group">
-          <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)] group-focus-within:text-blue-500 transition-colors" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onFocus={() => { if (results) setShowResults(true); }}
-            placeholder="Search tasks, teams, or people..."
-            className="w-full pl-10 pr-4 py-2 bg-[var(--bg-body)] border-none rounded-full text-sm focus:ring-2 focus:ring-blue-500/50 outline-none transition-all placeholder-gray-400 text-[var(--text-main)]"
-          />
-          {loading && (
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          )}
-
-          {showResults && (
-            <SearchResults results={results} onClose={handleCloseSearch} />
-          )}
-        </div>
-      </div>
-
-      {/* Right: Actions */}
-      <div className="navbar-right flex items-center gap-4">
-        {/* Dark Mode Toggle */}
-        <button
-          onClick={() => setDarkMode(!darkMode)}
-          className="p-2 rounded-full text-[var(--text-secondary)] hover:bg-[var(--bg-body)] transition-colors"
-          title="Toggle Dark Mode"
+        {/* LEFT - Logo */}
+        <div 
+          ref={navLeftRef}
+          className={`nav-left flex items-center flex-1 ${mobileSearchOpen ? 'hidden' : 'flex'}`}
         >
-          {darkMode ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
+          <NavLink to="/dashboard" className="logo text-[var(--primary)] hover:text-blue-600 transition-colors text-xl font-semibold no-underline">
+            TaskFlow
+          </NavLink>
+        </div>
 
-        <NotificationBell />
+        {/* CENTER - Search Bar */}
+        <div 
+          ref={navCenterRef}
+          className={`nav-center flex justify-center items-center mx-0 transition-all ${
+            mobileSearchOpen 
+              ? 'flex-[1] w-full' 
+              : 'flex-[8] hidden md:flex'
+          }`}
+        >
+          {/* Back Arrow (Mobile Only) */}
+          <button
+            onClick={handleMobileSearchClose}
+            className={`text-[var(--primary)] hover:text-blue-600 mr-6 cursor-pointer ${
+              mobileSearchOpen ? 'block' : 'hidden'
+            }`}
+          >
+            <ArrowLeft size={20} />
+          </button>
 
-        <div className="flex items-center gap-3 pl-2 border-l border-[var(--border)]">
-          <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-semibold text-sm ring-2 ring-white dark:ring-gray-700">
-            {user?.name?.[0] || 'U'}
-          </div>
-
-          <div className="flex flex-col items-end">
-            <button
-              onClick={logout}
-              className="text-xs font-medium text-[var(--text-secondary)] hover:text-red-500 transition-colors"
+          {/* Search Input */}
+          <div className="relative flex items-center w-full max-w-[600px]">
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => {
+                if (results) setShowResults(true);
+              }}
+              placeholder="Search tasks, teams..."
+              className="w-full md:w-[70%] bg-[var(--bg-surface)] border border-[var(--primary)] border-r-0 pl-3 pr-2 py-1.5 outline-none text-[var(--text-main)] text-base placeholder-[var(--text-tertiary)]"
+              style={{ color: 'var(--text-main)', backgroundColor: 'var(--bg-surface)' }}
+            />
+            <button 
+              className="px-7 py-[7px] bg-[var(--bg-surface)] text-[var(--primary)] hover:text-blue-600 border border-[var(--primary)] border-l-0 cursor-pointer transition-colors"
+              style={{ backgroundColor: 'var(--bg-surface)' }}
+              onClick={() => {
+                if (query.trim()) {
+                  // Trigger search
+                  setShowResults(true);
+                }
+              }}
             >
-              Logout
+              <Search size={20} />
             </button>
+
+            {/* Loading Spinner */}
+            {loading && (
+              <div className="absolute right-12 top-1/2 -translate-y-1/2 w-4 h-4 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin"></div>
+            )}
+
+            {/* Search Results Dropdown */}
+            {showResults && (
+              <SearchResults results={results} onClose={handleCloseSearch} />
+            )}
           </div>
         </div>
+
+        {/* RIGHT - Actions */}
+        <div 
+          ref={navRightRef}
+          className={`nav-right flex justify-end items-center gap-2 flex-[3] ${mobileSearchOpen ? 'hidden' : 'flex'}`}
+        >
+          {/* Mobile Search Icon */}
+          <button
+            onClick={handleMobileSearchOpen}
+            className="md:hidden text-[var(--primary)] hover:text-blue-600 cursor-pointer transition-colors p-2"
+          >
+            <Search size={20} />
+          </button>
+
+          {/* New Button (Desktop) */}
+          <div className="hidden md:block">
+            <NewButtonDropdown
+              onNewTask={handleNewTask}
+              onNewTeam={handleNewTeam}
+            />
+          </div>
+
+          {/* Notifications */}
+          <NotificationBell />
+
+          {/* Theme Toggle */}
+          <button
+            onClick={() => setDarkMode(!darkMode)}
+            className="text-[var(--primary)] hover:text-blue-600 cursor-pointer transition-colors p-2"
+            title="Toggle Dark Mode"
+            aria-label="Toggle dark mode"
+          >
+            {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+
+          {/* User Menu */}
+          <UserMenuDropdown />
+        </div>
+
       </div>
-    </header>
+    </nav>
   );
 };
 

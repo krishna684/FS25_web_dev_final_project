@@ -1,111 +1,340 @@
-import { useEffect, useState } from "react";
-import teamApi from "../api/teams";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import teamApi from '../api/teams';
+import TeamCard from '../components/teams/TeamCard';
+import CreateTeamModal from '../components/teams/CreateTeamModal';
+import JoinTeamModal from '../components/teams/JoinTeamModal';
+import EmptyState from '../components/teams/EmptyState';
+import { Search, Plus, LogIn, Loader } from 'lucide-react';
+import './TeamsPage.css';
 
 const TeamsPage = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
+
+  // State for teams data
   const [teams, setTeams] = useState([]);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Create team form
-  const [newTeamName, setNewTeamName] = useState("");
-  const [inviteCode, setInviteCode] = useState("");
+  // State for filters
+  const [activeTab, setActiveTab] = useState('all'); // 'all', 'owned', 'joined'
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const loadTeams = async () => {
+  // State for modals
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showJoinModal, setShowJoinModal] = useState(false);
+  const [createLoading, setCreateLoading] = useState(false);
+  const [joinLoading, setJoinLoading] = useState(false);
+
+  // Load teams
+  const loadTeams = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await teamApi.getAll();
-      setTeams(res.data);
-      setLoading(false);
+      setError('');
+      const response = await teamApi.getAll();
+      // Ensure we have the teams with proper member counts
+      setTeams(response.data || []);
     } catch (err) {
-      setError("Failed to load teams.");
+      console.error('Error loading teams:', err);
+      setError('Failed to load teams. Please try again.');
+      setTeams([]);
+    } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    loadTeams();
   }, []);
 
-  const handleCreateTeam = async (e) => {
-    e.preventDefault();
+  // Initial load
+  useEffect(() => {
+    loadTeams();
+  }, [loadTeams]);
+
+  // Persist filter selection to localStorage
+  useEffect(() => {
+    localStorage.setItem('teamsPageTab', activeTab);
+  }, [activeTab]);
+
+  // Restore filter from localStorage on mount
+  useEffect(() => {
+    const savedTab = localStorage.getItem('teamsPageTab');
+    if (savedTab && ['all', 'owned', 'joined'].includes(savedTab)) {
+      setActiveTab(savedTab);
+    }
+  }, []);
+
+  // Get user's role in team
+  const getUserRoleInTeam = (team) => {
+    const member = team.members?.find(
+      (m) => m.user?._id === user?.id || m.user === user?.id
+    );
+    return member?.role || null;
+  };
+
+  // Filter teams based on active tab
+  const filteredTeams = teams.filter((team) => {
+    if (activeTab === 'owned') {
+      return getUserRoleInTeam(team) === 'owner';
+    }
+    if (activeTab === 'joined') {
+      return getUserRoleInTeam(team) !== null;
+    }
+    return true; // 'all' tab
+  });
+
+  // Search teams
+  const searchedTeams = filteredTeams.filter((team) =>
+    team.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Handle create team
+  const handleCreateTeam = async (formData) => {
     try {
-      await teamApi.create({ name: newTeamName });
-      setNewTeamName("");
-      loadTeams();
-    } catch (err) {
-      console.error(err);
-      alert("Failed to create team");
+      setCreateLoading(true);
+      await teamApi.create({
+        name: formData.name,
+        description: formData.description,
+        colorTheme: formData.colorTheme,
+      });
+
+      // Show success message (would integrate with toast context)
+      console.log('Team created successfully');
+
+      // Reload teams
+      await loadTeams();
+
+      // Close modal
+      setShowCreateModal(false);
+    } catch (error) {
+      console.error('Create team error:', error);
+      throw error;
+    } finally {
+      setCreateLoading(false);
     }
   };
 
-  const handleJoinTeam = async (e) => {
-    e.preventDefault();
+  // Fetch team preview for join modal
+  const fetchTeamPreview = async (inviteCode) => {
+    // This would call an API endpoint to get team preview by invite code
+    // For now, we'll search in our teams list
+    const team = teams.find((t) => t.inviteCode === inviteCode);
+    if (team) {
+      return {
+        _id: team._id,
+        name: team.name,
+        description: team.description,
+        colorTheme: team.colorTheme,
+        memberCount: team.members?.length || 0,
+      };
+    }
+    throw new Error('Team not found');
+  };
+
+  // Handle join team
+  const handleJoinTeam = async (inviteCode) => {
     try {
+      setJoinLoading(true);
       await teamApi.join(inviteCode);
-      setInviteCode("");
-      loadTeams();
-    } catch (err) {
-      console.error(err);
-      alert("Failed to join team (check code)");
+
+      // Reload teams
+      await loadTeams();
+
+      // Close modal
+      setShowJoinModal(false);
+    } catch (error) {
+      console.error('Join team error:', error);
+      throw error;
+    } finally {
+      setJoinLoading(false);
     }
   };
 
-  if (loading) return <div>Loading teams...</div>;
+  // Handle view board
+  const handleViewBoard = (teamId) => {
+    navigate(`/teams/${teamId}`);
+  };
+
+  // Handle settings
+  const handleSettings = (teamId) => {
+    navigate(`/teams/${teamId}/settings`);
+  };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="teams-page-loading">
+        <Loader className="spinner-animate" size={48} />
+        <p>Loading your teams...</p>
+      </div>
+    );
+  }
+
+  // Empty state
+  if (teams.length === 0) {
+    return (
+      <div className="teams-page">
+        <div className="teams-page-header">
+          <div>
+            <h1 className="page-title">Teams</h1>
+            <p className="page-subtitle">
+              Collaborate with your team members on shared tasks and projects
+            </p>
+          </div>
+        </div>
+
+        <EmptyState
+          onCreateTeam={() => setShowCreateModal(true)}
+          onJoinTeam={() => setShowJoinModal(true)}
+        />
+
+        {/* Modals */}
+        <CreateTeamModal
+          isOpen={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          onCreate={handleCreateTeam}
+          loading={createLoading}
+        />
+
+        <JoinTeamModal
+          isOpen={showJoinModal}
+          onClose={() => setShowJoinModal(false)}
+          onJoin={handleJoinTeam}
+          loading={joinLoading}
+          fetchTeamPreview={fetchTeamPreview}
+        />
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <h2 className="page-title">My Teams</h2>
-      {error && <p className="error">{error}</p>}
-
-      <div className="teams-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-
-        {/* List Teams */}
+    <div className="teams-page">
+      {/* Page Header */}
+      <div className="teams-page-header">
         <div>
-          <h3>Your Teams</h3>
-          {teams.length === 0 ? <p>You are not in any teams.</p> : (
-            <ul className="team-list">
-              {teams.map(team => (
-                <li key={team._id} style={{ border: '1px solid #ccc', padding: '10px', margin: '10px 0' }}>
-                  <Link to={`/teams/${team._id}`}><strong>{team.name}</strong></Link>
-                  <p>{team.members?.length} members</p>
-                </li>
-              ))}
-            </ul>
-          )}
+          <h1 className="page-title">Teams</h1>
+          <p className="page-subtitle">
+            Manage your teams and collaborate with team members
+          </p>
         </div>
 
-        {/* Actions */}
-        <div>
-          <div className="card">
-            <h3>Create New Team</h3>
-            <form onSubmit={handleCreateTeam}>
-              <input
-                type="text"
-                placeholder="Team Name"
-                value={newTeamName}
-                onChange={e => setNewTeamName(e.target.value)}
-                required
-              />
-              <button type="submit" className="btn-primary" style={{ marginTop: '0.5rem' }}>Create</button>
-            </form>
-          </div>
+        {/* Action Buttons */}
+        <div className="teams-page-actions">
+          <button
+            className="btn btn-secondary"
+            onClick={() => setShowJoinModal(true)}
+          >
+            <LogIn size={18} />
+            <span>Join Team</span>
+          </button>
 
-          <div className="card" style={{ marginTop: '1rem' }}>
-            <h3>Join Team</h3>
-            <form onSubmit={handleJoinTeam}>
-              <input
-                type="text"
-                placeholder="Invite Code"
-                value={inviteCode}
-                onChange={e => setInviteCode(e.target.value)}
-                required
-              />
-              <button type="submit" className="btn-secondary" style={{ marginTop: '0.5rem' }}>Join</button>
-            </form>
-          </div>
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowCreateModal(true)}
+          >
+            <Plus size={18} />
+            <span>Create Team</span>
+          </button>
         </div>
       </div>
+
+      {/* Error message */}
+      {error && (
+        <div className="error-banner">
+          <p>{error}</p>
+          <button onClick={loadTeams} className="btn btn-sm btn-secondary">
+            Try Again
+          </button>
+        </div>
+      )}
+
+      {/* Search and Filters */}
+      <div className="teams-controls">
+        {/* Search Bar */}
+        <div className="search-container">
+          <Search size={18} className="search-icon" />
+          <input
+            type="text"
+            className="form-input search-input"
+            placeholder="Search teams by name..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        {/* Tabs */}
+        <div className="teams-tabs">
+          <button
+            className={`tab ${activeTab === 'all' ? 'active' : ''}`}
+            onClick={() => setActiveTab('all')}
+          >
+            All Teams
+            {teams.length > 0 && <span className="tab-count">{teams.length}</span>}
+          </button>
+
+          <button
+            className={`tab ${activeTab === 'owned' ? 'active' : ''}`}
+            onClick={() => setActiveTab('owned')}
+          >
+            Owned by Me
+            {teams.filter((t) => getUserRoleInTeam(t) === 'owner').length > 0 && (
+              <span className="tab-count">
+                {teams.filter((t) => getUserRoleInTeam(t) === 'owner').length}
+              </span>
+            )}
+          </button>
+
+          <button
+            className={`tab ${activeTab === 'joined' ? 'active' : ''}`}
+            onClick={() => setActiveTab('joined')}
+          >
+            Joined Teams
+            {teams.filter((t) => getUserRoleInTeam(t) !== null).length > 0 && (
+              <span className="tab-count">
+                {teams.filter((t) => getUserRoleInTeam(t) !== null).length}
+              </span>
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Teams Grid */}
+      {searchedTeams.length === 0 ? (
+        <div className="teams-empty-search">
+          <p>
+            {searchQuery
+              ? `No teams found matching "${searchQuery}"`
+              : 'No teams in this category'}
+          </p>
+        </div>
+      ) : (
+        <div className="teams-grid">
+          {searchedTeams.map((team) => (
+            <TeamCard
+              key={team._id}
+              team={team}
+              userRole={getUserRoleInTeam(team)}
+              onViewBoard={() => handleViewBoard(team._id)}
+              onSettings={() => handleSettings(team._id)}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Modals */}
+      <CreateTeamModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onCreate={handleCreateTeam}
+        loading={createLoading}
+      />
+
+      <JoinTeamModal
+        isOpen={showJoinModal}
+        onClose={() => setShowJoinModal(false)}
+        onJoin={handleJoinTeam}
+        loading={joinLoading}
+        fetchTeamPreview={fetchTeamPreview}
+      />
     </div>
   );
 };

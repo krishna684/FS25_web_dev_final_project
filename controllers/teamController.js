@@ -151,3 +151,153 @@ exports.leaveTeam = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+// Update member role (owner only)
+exports.updateMemberRole = async (req, res) => {
+    try {
+        const { teamId, memberId } = req.params;
+        const { role } = req.body;
+
+        if (!['owner', 'member'].includes(role)) {
+            return res.status(400).json({ error: 'Invalid role' });
+        }
+
+        const team = await Team.findById(teamId);
+        if (!team) {
+            return res.status(404).json({ error: 'Team not found' });
+        }
+
+        // Check if requester is owner
+        if (team.owner.toString() !== req.user.userId) {
+            return res.status(403).json({ error: 'Only team owners can change member roles' });
+        }
+
+        // Find member in team
+        const memberIndex = team.members.findIndex(m => m._id.toString() === memberId);
+        if (memberIndex === -1) {
+            return res.status(404).json({ error: 'Member not found in team' });
+        }
+
+        // Cannot change owner's role
+        if (team.members[memberIndex].user.toString() === team.owner.toString()) {
+            return res.status(400).json({ error: 'Cannot change owner role' });
+        }
+
+        // Update role
+        team.members[memberIndex].role = role;
+        await team.save();
+
+        // Populate member data for response
+        await team.populate('members.user', 'name email avatarUrl');
+
+        res.json({
+            message: 'Member role updated successfully',
+            member: team.members[memberIndex]
+        });
+
+        await activityController.logActivity(
+            req.user.userId,
+            teamId,
+            'team.member.role.changed',
+            `Changed ${team.members[memberIndex].user.name}'s role to ${role}`
+        );
+    } catch (err) {
+        console.error('Update Member Role Error:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+// Remove member from team (owner only)
+exports.removeMember = async (req, res) => {
+    try {
+        const { teamId, memberId } = req.params;
+
+        const team = await Team.findById(teamId);
+        if (!team) {
+            return res.status(404).json({ error: 'Team not found' });
+        }
+
+        // Check if requester is owner
+        if (team.owner.toString() !== req.user.userId) {
+            return res.status(403).json({ error: 'Only team owners can remove members' });
+        }
+
+        // Find member in team
+        const memberIndex = team.members.findIndex(m => m._id.toString() === memberId);
+        if (memberIndex === -1) {
+            return res.status(404).json({ error: 'Member not found in team' });
+        }
+
+        const memberToRemove = team.members[memberIndex];
+
+        // Cannot remove owner
+        if (memberToRemove.user.toString() === team.owner.toString()) {
+            return res.status(400).json({ error: 'Cannot remove team owner' });
+        }
+
+        // Remove from team
+        team.members.splice(memberIndex, 1);
+        await team.save();
+
+        // Update user's teams array
+        await User.findByIdAndUpdate(memberToRemove.user, {
+            $pull: { teams: teamId },
+        });
+
+        // Unassign user from all team tasks
+        const Task = require('../models/Task');
+        await Task.updateMany(
+            { team: teamId, assignedTo: memberToRemove.user },
+            { $set: { assignedTo: null } }
+        );
+
+        res.json({ message: 'Member removed successfully' });
+
+        await activityController.logActivity(
+            req.user.userId,
+            teamId,
+            'team.member.left',
+            `Removed ${memberToRemove.user.name || 'member'} from team`
+        );
+    } catch (err) {
+        console.error('Remove Member Error:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+// Regenerate invite code (owner only)
+exports.regenerateInviteCode = async (req, res) => {
+    try {
+        const { teamId } = req.params;
+
+        const team = await Team.findById(teamId);
+        if (!team) {
+            return res.status(404).json({ error: 'Team not found' });
+        }
+
+        // Check if requester is owner
+        if (team.owner.toString() !== req.user.userId) {
+            return res.status(403).json({ error: 'Only team owners can regenerate invite codes' });
+        }
+
+        // Generate new invite code
+        const newInviteCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+        team.inviteCode = newInviteCode;
+        await team.save();
+
+        res.json({
+            message: 'Invite code regenerated successfully',
+            inviteCode: newInviteCode
+        });
+
+        await activityController.logActivity(
+            req.user.userId,
+            teamId,
+            'team.invite.regenerated',
+            `Regenerated team invite code`
+        );
+    } catch (err) {
+        console.error('Regenerate Invite Code Error:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
