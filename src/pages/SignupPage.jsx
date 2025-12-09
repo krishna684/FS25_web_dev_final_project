@@ -54,10 +54,10 @@ const SignupPage = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     // Skip honeypot field
     if (name === "website") return;
-    
+
     setForm((f) => ({ ...f, [name]: value }));
 
     // Real-time validation
@@ -73,14 +73,6 @@ const SignupPage = () => {
       if (value && !validateEmail(value)) {
         setEmailError("Please enter a valid email address");
         setEmailAvailable(null);
-      } else if (value && validateEmail(value)) {
-        setEmailError("");
-        // Simulate email availability check
-        setEmailChecking(true);
-        setTimeout(() => {
-          setEmailChecking(false);
-          setEmailAvailable(Math.random() > 0.5); // Mock availability
-        }, 1000);
       } else {
         setEmailError("");
         setEmailAvailable(null);
@@ -132,11 +124,6 @@ const SignupPage = () => {
 
     if (!validateEmail(form.email)) {
       setEmailError("Please enter a valid email address");
-      return;
-    }
-
-    if (emailAvailable === false) {
-      setEmailError("This email is already in use");
       return;
     }
 
@@ -277,21 +264,19 @@ const SignupPage = () => {
               <div className="mt-2">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm text-gray-600">Password strength:</span>
-                  <span className={`text-sm font-medium ${
-                    checkPasswordStrength(form.password).level === 'weak' ? 'text-red-500' :
-                    checkPasswordStrength(form.password).level === 'medium' ? 'text-yellow-500' :
-                    'text-green-500'
-                  }`}>
+                  <span className={`text-sm font-medium ${checkPasswordStrength(form.password).level === 'weak' ? 'text-red-500' :
+                      checkPasswordStrength(form.password).level === 'medium' ? 'text-yellow-500' :
+                        'text-green-500'
+                    }`}>
                     {checkPasswordStrength(form.password).text}
                   </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
-                    className={`h-2 rounded-full transition-all duration-300 ${
-                      checkPasswordStrength(form.password).level === 'weak' ? 'bg-red-500 w-1/3' :
-                      checkPasswordStrength(form.password).level === 'medium' ? 'bg-yellow-500 w-2/3' :
-                      'bg-green-500 w-full'
-                    }`}
+                    className={`h-2 rounded-full transition-all duration-300 ${checkPasswordStrength(form.password).level === 'weak' ? 'bg-red-500 w-1/3' :
+                        checkPasswordStrength(form.password).level === 'medium' ? 'bg-yellow-500 w-2/3' :
+                          'bg-green-500 w-full'
+                      }`}
                   ></div>
                 </div>
                 <div className="mt-2 space-y-1">
@@ -390,9 +375,9 @@ const SignupPage = () => {
             </label>
           </div>
 
-          <button 
-            className="btn btn-primary btn-block mb-4 sm:mb-6 flex items-center justify-center" 
-            type="submit" 
+          <button
+            className="btn btn-primary btn-block mb-4 sm:mb-6 flex items-center justify-center"
+            type="submit"
             disabled={isLoading || !form.name || !form.email || !form.password || !form.confirmPassword || !acceptedTerms || !!nameError || !!emailError || !!passwordError || !!confirmPasswordError}
             title={!acceptedTerms ? "You must accept the Terms and Privacy Policy to continue" : ""}
           >
