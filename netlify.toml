@@ -1,0 +1,37 @@
+[build]
+  # Build command - Netlify will run npm install automatically before this
+  command = "npm run build"
+  
+  # Publish directory - where Vite outputs the built files
+  publish = "dist"
+  
+  # Set Node version to ensure compatibility
+  environment = { NODE_VERSION = "18" }
+
+# Redirect all requests to index.html for SPA routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Function configuration (if using serverless functions)
+[functions]
+  node_bundler = "esbuild"
+  
+# Build settings to ensure proper dependency installation
+[build.processing]
+  skip_processing = false
+
+[build.processing.css]
+  bundle = true
+  minify = true
+
+[build.processing.js]
+  bundle = true
+  minify = true
+
+[build.processing.html]
+  pretty_urls = true
+
+[build.processing.images]
+  compress = true
