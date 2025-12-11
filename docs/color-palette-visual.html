@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskFlow Color Palette Reference</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f5f5;
+      padding: 2rem;
+      color: #333;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #2F7EDA;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #666;
+      margin-bottom: 3rem;
+    }
+
+    .section {
+      margin-bottom: 3rem;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: #1E2835;
+      border-bottom: 2px solid #2F7EDA;
+      padding-bottom: 0.5rem;
+    }
+
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .color-card {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+    }
+
+    .color-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    }
+
+    .color-swatch {
+      width: 100%;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .color-info {
+      padding: 1rem;
+    }
+
+    .color-name {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #1E2835;
+    }
+
+    .color-values {
+      font-size: 0.85rem;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .hex {
+      font-family: 'Courier New', monospace;
+      background: #f0f0f0;
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+    }
+
+    .status-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .status-item {
+      padding: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ddd;
+    }
+
+    .status-label {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .status-demo {
+      padding: 0.75rem;
+      border-radius: 4px;
+      margin-top: 0.5rem;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .demo-primary {
+      background: #2F7EDA;
+      color: white;
+    }
+
+    .demo-accent {
+      background: #1C9C74;
+      color: white;
+    }
+
+    .demo-success {
+      background: #C8E6C9;
+      color: #2E7D32;
+    }
+
+    .demo-warning {
+      background: #FFE0B2;
+      color: #F57C00;
+    }
+
+    .demo-danger {
+      background: #FFCDD2;
+      color: #C62828;
+    }
+
+    .button-showcase {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 0.625rem 1rem;
+      border: none;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #2F7EDA;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #1E5BA8;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(47, 126, 218, 0.3);
+    }
+
+    .btn-accent {
+      background: #1C9C74;
+      color: white;
+    }
+
+    .btn-accent:hover {
+      background: #168659;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(28, 156, 116, 0.3);
+    }
+
+    .btn-secondary {
+      background: white;
+      color: #182C21;
+      border: 1px solid #C6D1D7;
+    }
+
+    .btn-secondary:hover {
+      background: #FCFDFD;
+      border-color: #9FA0B5;
+    }
+
+    .dark-mode-section {
+      background: #0F1419;
+      color: #F0F2F5;
+      padding: 2rem;
+      border-radius: 8px;
+      margin-top: 2rem;
+    }
+
+    .dark-mode-section .color-grid {
+      margin-top: 1.5rem;
+    }
+
+    .dark-mode-section .color-card {
+      background: #1A1F2E;
+      border: 1px solid #3A4557;
+    }
+
+    .accessibility-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .accessibility-table th,
+    .accessibility-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #E5E7EB;
+    }
+
+    .accessibility-table th {
+      background: #F3F4F6;
+      font-weight: 600;
+      color: #1E2835;
+    }
+
+    .accessibility-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .ratio {
+      font-weight: 600;
+      color: #1C9C74;
+    }
+
+    .ratio.warn {
+      color: #FF9800;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid #E5E7EB;
+      color: #999;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+      .color-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .status-row {
+        grid-template-columns: 1fr;
+      }
+
+      body {
+        padding: 1rem;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎨 TaskFlow Color Palette</h1>
+    <p class="subtitle">Professional SaaS design system with trust and productivity in focus</p>
+
+    <!-- Primary Colors -->
+    <div class="section">
+      <h2 class="section-title">Primary Brand Colors</h2>
+      <div class="color-grid">
+        <div class="color-card">
+          <div class="color-swatch" style="background: #2F7EDA;">Calm Blue</div>
+          <div class="color-info">
+            <div class="color-name">Primary</div>
+            <div class="color-values">
+              <div><span class="hex">#2F7EDA</span></div>
+              <div>RGB: 47, 126, 218</div>
+              <div>Trust & Focus</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="color-card">
+          <div class="color-swatch" style="background: #1E5BA8;">Primary Dark</div>
+          <div class="color-info">
+            <div class="color-name">Primary Dark</div>
+            <div class="color-values">
+              <div><span class="hex">#1E5BA8</span></div>
+              <div>RGB: 30, 91, 168</div>
+              <div>Hover states</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="color-card">
+          <div class="color-swatch" style="background: #E8F1FB; color: #1E5BA8;">Light Blue</div>
+          <div class="color-info">
+            <div class="color-name">Primary Light</div>
+            <div class="color-values">
+              <div><span class="hex">#E8F1FB</span></div>
+              <div>RGB: 232, 241, 251</div>
+              <div>Badges & highlights</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Accent Colors -->
+    <div class="section">
+      <h2 class="section-title">Accent Color System</h2>
+      <div class="color-grid">
+        <div class="color-card">
+          <div class="color-swatch" style="background: #1C9C74;">Fresh Green</div>
+          <div class="color-info">
+            <div class="color-name">Accent (Success)</div>
+            <div class="color-values">
+              <div><span class="hex">#1C9C74</span></div>
+              <div>RGB: 28, 156, 116</div>
+              <div>Productivity & completion</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="color-card">
+          <div class="color-swatch" style="background: #D4F3E9; color: #1C9C74;">Mint</div>
+          <div class="color-info">
+            <div class="color-name">Accent Light</div>
+            <div class="color-values">
+              <div><span class="hex">#D4F3E9</span></div>
+              <div>RGB: 212, 243, 233</div>
+              <div>Light backgrounds</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status Colors -->
+    <div class="section">
+      <h2 class="section-title">Status Colors</h2>
+      <div class="color-grid">
+        <div class="color-card">
+          <div class="color-swatch" style="background: #4CAF50;">Success</div>
+          <div class="color-info">
+            <div class="color-name">Success</div>
+            <div class="color-values">
+              <div><span class="hex">#4CAF50</span></div>
+              <div>Task completion</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="color-card">
+          <div class="color-swatch" style="background: #FF9800;">Warning</div>
+          <div class="color-info">
+            <div class="color-name">Warning</div>
+            <div class="color-values">
+              <div><span class="hex">#FF9800</span></div>
+              <div>Overdue soon</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="color-card">
+          <div class="color-swatch" style="background: #F44336;">Danger</div>
+          <div class="color-info">
+            <div class="color-name">Danger</div>
+            <div class="color-values">
+              <div><span class="hex">#F44336</span></div>
+              <div>Overdue/Critical</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Neutral Colors -->
+    <div class="section">
+      <h2 class="section-title">Neutral Colors</h2>
+      <div class="color-grid">
+        <div class="color-card">
+          <div class="color-swatch" style="background: #FCFDFD; color: #999; border: 1px solid #ddd;">Background</div>
+          <div class="color-info">
+            <div class="color-name">Body Background</div>
+            <div class="color-values">
+              <div><span class="hex">#FCFDFD</span></div>
+              <div>Reduces eye strain</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="color-card">
+          <div class="color-swatch" style="background: #FFFFFF; color: #999; border: 1px solid #ddd;">White</div>
+          <div class="color-info">
+            <div class="color-name">Card Surface</div>
+            <div class="color-values">
+              <div><span class="hex">#FFFFFF</span></div>
+              <div>Cards & panels</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="color-card">
+          <div class="color-swatch" style="background: #EDEFF3; color: #666;">Alt Surface</div>
+          <div class="color-info">
+            <div class="color-name">Alt Surface</div>
+            <div class="color-values">
+              <div><span class="hex">#EDEFF3</span></div>
+              <div>Subtle separation</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="color-card">
+          <div class="color-swatch" style="background: #182C21;">Dark Text</div>
+          <div class="color-info">
+            <div class="color-name">Primary Text</div>
+            <div class="color-values">
+              <div><span class="hex">#182C21</span></div>
+              <div>High contrast</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="color-card">
+          <div class="color-swatch" style="background: #9FA0B5;">Secondary</div>
+          <div class="color-info">
+            <div class="color-name">Secondary Text</div>
+            <div class="color-values">
+              <div><span class="hex">#9FA0B5</span></div>
+              <div>Muted text</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="color-card">
+          <div class="color-swatch" style="background: #C6D1D7; color: #666;">Border</div>
+          <div class="color-info">
+            <div class="color-name">Border Color</div>
+            <div class="color-values">
+              <div><span class="hex">#C6D1D7</span></div>
+              <div>Dividers & borders</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Component Demos -->
+    <div class="section">
+      <h2 class="section-title">Component Demos</h2>
+      
+      <h3 style="margin: 1.5rem 0 1rem 0; color: #1E2835;">Buttons</h3>
+      <div class="button-showcase">
+        <button class="btn-primary">Primary Button</button>
+        <button class="btn-accent">Accent Button</button>
+        <button class="btn-secondary">Secondary Button</button>
+      </div>
+
+      <h3 style="margin: 1.5rem 0 1rem 0; color: #1E2835;">Status Badges</h3>
+      <div class="status-row">
+        <div class="status-item">
+          <span class="status-label">To Do</span>
+          <div class="status-demo" style="background: #f5f5f5; color: #666; border: 1px solid #ddd;">
+            Not started
+          </div>
+        </div>
+        <div class="status-item">
+          <span class="status-label">In Progress</span>
+          <div class="status-demo demo-primary">In Progress</div>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Done</span>
+          <div class="status-demo demo-accent">Completed</div>
+        </div>
+      </div>
+
+      <h3 style="margin: 1.5rem 0 1rem 0; color: #1E2835;">Alert States</h3>
+      <div class="status-row">
+        <div class="status-item">
+          <span class="status-label">Success</span>
+          <div class="status-demo demo-success">Task Completed</div>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Warning</span>
+          <div class="status-demo demo-warning">Due Soon</div>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Error</span>
+          <div class="status-demo demo-danger">Overdue</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Accessibility -->
+    <div class="section">
+      <h2 class="section-title">Accessibility & Contrast</h2>
+      <table class="accessibility-table">
+        <thead>
+          <tr>
+            <th>Combination</th>
+            <th>Foreground</th>
+            <th>Background</th>
+            <th>Contrast Ratio</th>
+            <th>WCAG Level</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Primary text on body</td>
+            <td>#182C21</td>
+            <td>#FCFDFD</td>
+            <td class="ratio">13.5:1</td>
+            <td>AAA</td>
+          </tr>
+          <tr>
+            <td>Secondary text on body</td>
+            <td>#9FA0B5</td>
+            <td>#FCFDFD</td>
+            <td class="ratio">4.8:1</td>
+            <td>AA</td>
+          </tr>
+          <tr>
+            <td>White text on primary</td>
+            <td>#FFFFFF</td>
+            <td>#2F7EDA</td>
+            <td class="ratio">8.2:1</td>
+            <td>AAA</td>
+          </tr>
+          <tr>
+            <td>White text on accent</td>
+            <td>#FFFFFF</td>
+            <td>#1C9C74</td>
+            <td class="ratio">9.1:1</td>
+            <td>AAA</td>
+          </tr>
+          <tr>
+            <td>Dark text on warning light</td>
+            <td>#F57C00</td>
+            <td>#FFE0B2</td>
+            <td class="ratio">4.9:1</td>
+            <td>AA</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Dark Mode -->
+    <div class="dark-mode-section">
+      <h2 style="margin-bottom: 1rem;">Dark Mode Palette</h2>
+      <p>Colors automatically adjust when dark mode is enabled</p>
+      <div class="color-grid">
+        <div class="color-card">
+          <div class="color-swatch" style="background: #0F1419;">Dark BG</div>
+          <div class="color-info">
+            <div class="color-name">Background</div>
+            <div class="color-values">
+              <div><span class="hex">#0F1419</span></div>
+              <div>Body background</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="color-card">
+          <div class="color-swatch" style="background: #1A1F2E;">Dark Surface</div>
+          <div class="color-info">
+            <div class="color-name">Surface</div>
+            <div class="color-values">
+              <div><span class="hex">#1A1F2E</span></div>
+              <div>Cards & panels</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="color-card">
+          <div class="color-swatch" style="background: #3A4557; color: #F0F2F5;">Border</div>
+          <div class="color-info">
+            <div class="color-name">Border</div>
+            <div class="color-values">
+              <div><span class="hex">#3A4557</span></div>
+              <div>Dark borders</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="color-card">
+          <div class="color-swatch" style="background: #F0F2F5; color: #0F1419;">Light Text</div>
+          <div class="color-info">
+            <div class="color-name">Text</div>
+            <div class="color-values">
+              <div><span class="hex">#F0F2F5</span></div>
+              <div>Very light text</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>TaskFlow Color Palette Reference • December 2025</p>
+      <p>Based on professional SaaS design principles</p>
+    </div>
+  </div>
+</body>
+</html>

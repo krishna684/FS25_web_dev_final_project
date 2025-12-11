@@ -1,0 +1,205 @@
+/* JoinTeamModal.css */
+
+/* This file uses the same modal styles from CreateTeamModal.css
+   Importing those shared styles below */
+
+.join-team-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.invite-code-input {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: var(--weight-semibold);
+  font-family: var(--font-mono);
+  font-size: 18px;
+  padding: 14px 16px;
+}
+
+.invite-code-input::placeholder {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 14px;
+}
+
+.team-preview {
+  padding: 16px;
+  background-color: var(--primary-lighter);
+  border: 2px solid var(--primary-light);
+  border-radius: var(--radius-lg);
+  animation: slideDown 300ms ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.team-preview-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  background-color: var(--info-lighter);
+  border: 1px solid var(--info-light);
+  border-radius: var(--radius-md);
+  color: var(--info);
+  font-size: var(--text-small);
+}
+
+.team-preview-error {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: var(--danger-lighter);
+  border: 1px solid var(--danger-light);
+  border-radius: var(--radius-md);
+  color: var(--danger);
+  font-size: var(--text-small);
+  margin-top: -4px;
+}
+
+.team-preview-error svg {
+  flex-shrink: 0;
+}
+
+.preview-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.preview-info {
+  flex: 1;
+}
+
+.preview-name {
+  font-size: var(--text-h3);
+  font-weight: var(--weight-semibold);
+  color: var(--text-main);
+  margin: 0 0 4px;
+}
+
+.preview-members {
+  font-size: var(--text-small);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.preview-description {
+  font-size: var(--text-small);
+  color: var(--text-secondary);
+  margin: 12px 0 0;
+  line-height: var(--leading-small);
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.preview-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-small);
+  color: var(--text-secondary);
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.preview-lock-text {
+  display: block;
+}
+
+/* Success Animation */
+.join-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  padding: 40px 20px;
+}
+
+.success-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background-color: var(--success-lighter);
+  border-radius: var(--radius-full);
+  color: var(--success);
+}
+
+.success-icon svg {
+  animation: scaleIn 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.success-title {
+  font-size: var(--text-h2);
+  font-weight: var(--weight-semibold);
+  color: var(--success);
+  margin: 0;
+}
+
+.success-message {
+  font-size: var(--text-body);
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: var(--leading-body);
+  max-width: 300px;
+}
+
+.success-message strong {
+  color: var(--text-main);
+  font-weight: var(--weight-semibold);
+}
+
+/* Spinner for loading states */
+.spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .invite-code-input {
+    font-size: 16px;
+    padding: 12px 14px;
+  }
+
+  .success-message {
+    font-size: var(--text-small);
+  }
+}
