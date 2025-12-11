@@ -87,16 +87,17 @@ const TodaysFocusWidget = ({ tasks = [], onToggleComplete }) => {
                             key={task._id || index}
                             className="group flex items-start gap-3 p-3 rounded-lg hover:bg-[var(--bg-hover)] transition-colors cursor-pointer border border-transparent hover:border-[var(--border)]"
                         >
-                            {/* Checkbox */}
+                            {/* Complete Button */}
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onToggleComplete?.(task._id);
                                 }}
-                                className="mt-0.5 flex-shrink-0 text-[var(--text-secondary)] hover:text-[var(--primary)] transition-colors"
+                                className="mt-0.5 flex-shrink-0 px-2 py-1 rounded-md bg-[var(--primary)] text-white text-xs hover:brightness-110 transition-colors"
                                 aria-label={`Mark "${task.title}" as complete`}
+                                title="Complete task"
                             >
-                                <Circle size={20} strokeWidth={2} />
+                                Complete
                             </button>
 
                             {/* Task Content */}
