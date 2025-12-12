@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
-import { Circle, CheckCircle2, Clock, Tag, User, MoreVertical } from 'lucide-react';
-import PriorityBadge from '../common/PriorityBadge';
+import { Circle, CheckCircle2, Clock, Tag, User, MoreVertical, Calendar, MessageSquare, Paperclip } from 'lucide-react';
+
 
 /**
  * Enhanced Task Card Component
@@ -16,138 +16,165 @@ const TaskCard = ({ task, onToggle, onClick, onEdit, onDelete, showTeam = false,
         dueDate,
         category,
         assignedTo,
-        team
+        team,
+        comments = [], // Assuming comments count comes from here or similar
+        attachments = [] // Assuming attachments count comes from here
     } = task;
 
     const isCompleted = status === 'done';
     const isOverdue = dueDate && new Date(dueDate) < new Date() && !isCompleted;
 
-    const formatDate = (dateString) => {
+    const formatDateTime = (dateString) => {
         if (!dateString) return null;
-
         const date = new Date(dateString);
-        const today = new Date();
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
 
-        const isToday = date.toDateString() === today.toDateString();
-        const isTomorrow = date.toDateString() === tomorrow.toDateString();
-
-        if (isToday) return 'Today';
-        if (isTomorrow) return 'Tomorrow';
-
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        // Format: Dec 15, 2:00pm
+        return date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit'
+        });
     };
 
+    const getPriorityStyles = (p) => {
+        switch (p) {
+            case 'high': return { border: '#EF4444', badgeBg: '#FEE2E2', badgeText: '#991B1B', label: 'HIGH' };
+            case 'medium': return { border: '#F97316', badgeBg: '#FED7AA', badgeText: '#9A3412', label: 'MED' };
+            case 'low': return { border: '#9CA3AF', badgeBg: '#E5E7EB', badgeText: '#374151', label: 'LOW' };
+            default: return { border: 'transparent', badgeBg: '#E5E7EB', badgeText: '#374151', label: 'LOW' };
+        }
+    };
+
+    const priorityStyles = getPriorityStyles(priority);
+
     const handleCardClick = (e) => {
-        // Don't trigger if clicking on checkbox or actions
-        if (e.target.closest('button, input')) return;
+        if (e.target.closest('button, input, a')) return;
         onClick?.(task);
     };
 
     return (
         <div
-            className={`card card-interactive transition-all duration-200 ${isCompleted ? 'opacity-60' : ''} ${isSelected && bulkMode ? 'ring-2 ring-primary bg-blue-50 dark:bg-blue-900/20' : ''}`}
+            className={`group relative bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-lg transition-all duration-200 overflow-hidden flex flex-col ${isCompleted ? 'opacity-60' : ''} ${isSelected && bulkMode ? 'ring-2 ring-primary' : ''}`}
+            style={{
+                height: 'auto',
+                minHeight: '130px',
+                borderLeft: `4px solid ${priorityStyles.border}`
+            }}
             onClick={handleCardClick}
         >
-            <div className="flex items-start gap-3">
-                {/* Checkbox - Bulk Mode or Complete Toggle */}
-                {bulkMode ? (
-                    <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => onClick?.(task)}
-                        className="mt-1 w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
-                        onClick={(e) => e.stopPropagation()}
-                    />
-                ) : (
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onToggle?.(_id);
+            {/* 1. Header Row */}
+            <div className="flex items-center justify-between px-4 pt-4 pb-2">
+                <div className="flex items-center gap-2">
+                    {/* Priority Badge */}
+                    <span
+                        className="inline-block text-[11px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider"
+                        style={{
+                            backgroundColor: priorityStyles.badgeBg,
+                            color: priorityStyles.badgeText
                         }}
-                        className="mt-1 flex-shrink-0 transition-colors"
-                        aria-label={isCompleted ? 'Mark as incomplete' : 'Mark as complete'}
                     >
-                        {isCompleted ? (
-                            <CheckCircle2 size={20} className="text-green-500" />
-                        ) : (
-                            <Circle size={20} className="text-[var(--text-secondary)] hover:text-[var(--primary)]" />
-                        )}
-                    </button>
-                )}
+                        {priorityStyles.label}
+                    </span>
 
-                {/* Main Content */}
+                    {/* Category Tag (Header) */}
+                    {category && (
+                        <span className="text-sm font-medium text-[var(--text-secondary)]">
+                            {category}
+                        </span>
+                    )}
+                </div>
+
+                {/* Menu Button */}
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        // TODO: Show dropdown menu
+                    }}
+                    className="text-[var(--text-tertiary)] hover:text-[var(--text-main)] transition-colors p-1"
+                >
+                    <MoreVertical size={18} />
+                </button>
+            </div>
+
+            {/* 2. Main Content */}
+            <div className="flex-1 px-4 py-1 flex items-start gap-3">
+                {/* Checkbox (18px) */}
+                <div className="pt-0.5">
+                    {bulkMode ? (
+                        <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => onClick?.(task)}
+                            className="w-[18px] h-[18px] cursor-pointer"
+                            onClick={(e) => e.stopPropagation()}
+                        />
+                    ) : (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onToggle?.(_id);
+                            }}
+                            className="text-[var(--text-tertiary)] hover:text-[var(--primary)] transition-colors"
+                        >
+                            {isCompleted ? (
+                                <CheckCircle2 size={18} className="text-green-500" />
+                            ) : (
+                                <Circle size={18} />
+                            )}
+                        </button>
+                    )}
+                </div>
+
                 <div className="flex-1 min-w-0">
-                    {/* Title */}
-                    <h4 className={`font-semibold text-sm mb-1 ${isCompleted ? 'line-through text-[var(--text-secondary)]' : 'text-[var(--text-main)]'}`}>
+                    <h4 className={`text-[16px] font-semibold leading-snug mb-1 ${isCompleted ? 'line-through text-[var(--text-secondary)]' : 'text-[var(--text-main)]'}`}>
                         {title}
                     </h4>
-
-                    {/* Description */}
                     {description && (
-                        <p className="text-xs text-[var(--text-secondary)] mb-2 line-clamp-2">
+                        <p className="text-[14px] text-[var(--text-secondary)] line-clamp-2 leading-relaxed">
                             {description}
                         </p>
                     )}
-
-                    {/* Metadata Row */}
-                    <div className="flex flex-wrap items-center gap-2 text-xs">
-                        {/* Priority */}
-                        {priority && (
-                            <PriorityBadge priority={priority} size="small" />
-                        )}
-
-                        {/* Due Date */}
-                        {dueDate && (
-                            <div className={`flex items-center gap-1 px-2 py-1 rounded ${isOverdue
-                                ? 'bg-red-50 text-red-600 dark:bg-red-900/20'
-                                : 'bg-gray-100 text-gray-600 dark:bg-gray-800'
-                                }`}>
-                                <Clock size={12} />
-                                <span>{formatDate(dueDate)}</span>
-                            </div>
-                        )}
-
-                        {/* Category */}
-                        {category && (
-                            <div className="flex items-center gap-1 px-2 py-1 rounded bg-purple-50 text-purple-600 dark:bg-purple-900/20">
-                                <Tag size={12} />
-                                <span>{category}</span>
-                            </div>
-                        )}
-
-                        {/* Assignee */}
-                        {assignedTo && (
-                            <div className="flex items-center gap-1 px-2 py-1 rounded bg-blue-50 text-blue-600 dark:bg-blue-900/20">
-                                <User size={12} />
-                                <span>{assignedTo.name || assignedTo}</span>
-                            </div>
-                        )}
-
-                        {/* Team */}
-                        {showTeam && team && (
-                            <span className="px-2 py-1 rounded bg-gray-100 text-gray-600 dark:bg-gray-800 text-xs">
-                                {team.name || team}
-                            </span>
-                        )}
-                    </div>
-                </div>
-
-                {/* Actions Menu */}
-                <div className="flex-shrink-0">
-                    <button
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            // TODO: Show dropdown menu
-                        }}
-                        className="p-1 rounded hover:bg-[var(--bg-hover)] text-[var(--text-secondary)] hover:text-[var(--text-main)] opacity-0 group-hover:opacity-100 transition-opacity"
-                        aria-label="Task options"
-                    >
-                        <MoreVertical size={16} />
-                    </button>
                 </div>
             </div>
+
+            {/* 3. Metadata Row */}
+            <div className="px-4 pb-4 pt-3 mt-auto flex items-center gap-3 text-[13px] text-[var(--text-secondary)]">
+                {/* Due Date */}
+                {dueDate && (
+                    <div className={`flex items-center gap-1.5 ${isOverdue ? 'text-red-500 font-medium' : ''}`}>
+                        <Calendar size={14} />
+                        <span>{formatDateTime(dueDate)}</span>
+                    </div>
+                )}
+
+                {/* Separator if needed */}
+                {(dueDate && category) && <span>•</span>}
+
+                {/* Category (Metadata) */}
+                {category && (
+                    <span>{category}</span>
+                )}
+
+                {/* Comments & Attachments */}
+                <div className="flex items-center gap-3 ml-auto text-[var(--text-tertiary)]">
+                    {comments.length > 0 && (
+                        <div className="flex items-center gap-1 hover:text-[var(--text-secondary)] transition-colors" title={`${comments.length} comments`}>
+                            <MessageSquare size={14} />
+                            <span>{comments.length}</span>
+                        </div>
+                    )}
+
+                    {attachments.length > 0 && (
+                        <div className="flex items-center gap-1 hover:text-[var(--text-secondary)] transition-colors" title={`${attachments.length} attachments`}>
+                            <Paperclip size={14} />
+                            <span>{attachments.length}</span>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Show/Hide Edit/Delete buttons on hover could go here or in Menu */}
         </div>
     );
 };

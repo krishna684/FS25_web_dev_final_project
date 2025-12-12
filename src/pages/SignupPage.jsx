@@ -424,11 +424,11 @@ const SignupPage = () => {
               className="text-xs sm:text-sm text-gray-600 cursor-pointer leading-relaxed"
             >
               I agree to the{" "}
-              <Link to="/terms" className="text-primary hover:underline">
+              <Link to="/terms" className="text-white hover:underline">
                 Terms of Service
               </Link>{" "}
               and{" "}
-              <Link to="/privacy" className="text-primary hover:underline">
+              <Link to="/privacy" className="text-white hover:underline">
                 Privacy Policy
               </Link>
               .
@@ -467,7 +467,7 @@ const SignupPage = () => {
             <Link
               to="/login"
               style={{
-                color: "var(--primary)",
+                color: "#fff",
                 fontWeight: 600,
                 textDecoration: "none",
               }}

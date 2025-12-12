@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import { Circle, CheckCircle2, Clock, Calendar } from 'lucide-react';
-import PriorityBadge from '../common/PriorityBadge';
+
 
 /**
  * Today's Focus Widget
@@ -37,31 +37,40 @@ const TodaysFocusWidget = ({ tasks = [], onToggleComplete }) => {
         const isToday = date.toDateString() === today.toDateString();
         const isTomorrow = date.toDateString() === tomorrow.toDateString();
 
-        if (isToday) return 'Today';
-        if (isTomorrow) return 'Tomorrow';
+        if (isToday) return { text: 'Today', color: '#F59E0B' }; // Orange
+        if (isTomorrow) return { text: 'Tomorrow', color: '#F59E0B' }; // Orange
 
         const diffTime = date - today;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        if (diffDays < 0) return 'Overdue';
-        if (diffDays <= 7) return `In ${diffDays} days`;
+        if (diffDays < 0) return { text: 'Overdue', color: '#EF4444' }; // Red
 
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        // Future
+        return {
+            text: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            color: '#6B7280' // Gray
+        };
+    };
+
+    const getPriorityStyles = (priority) => {
+        switch (priority) {
+            case 'high': return { border: '#EF4444', badgeBg: '#FEE2E2', badgeText: '#991B1B', label: 'HIGH' };
+            case 'medium': return { border: '#F97316', badgeBg: '#FED7AA', badgeText: '#9A3412', label: 'MED' };
+            case 'low': return { border: '#9CA3AF', badgeBg: '#E5E7EB', badgeText: '#374151', label: 'LOW' };
+            default: return { border: '#9CA3AF', badgeBg: '#E5E7EB', badgeText: '#374151', label: 'LOW' };
+        }
     };
 
     if (focusTasks.length === 0) {
         return (
-            <div className="card">
+            <div className="card h-full">
                 <div className="card-header">
                     <h3 className="card-title">Today's Focus</h3>
                 </div>
-                <div className="py-8 text-center">
+                <div className="py-8 text-center flex-1 flex flex-col justify-center items-center">
                     <CheckCircle2 size={48} className="mx-auto mb-3 text-green-500 opacity-50" />
                     <p className="text-[var(--text-secondary)] text-sm">
                         All caught up! No priority tasks right now.
-                    </p>
-                    <p className="text-xs text-[var(--text-tertiary)] mt-2">
-                        Great job staying on top of your work! 🎉
                     </p>
                 </div>
             </div>
@@ -69,73 +78,100 @@ const TodaysFocusWidget = ({ tasks = [], onToggleComplete }) => {
     }
 
     return (
-        <div className="card">
-            <div className="card-header">
+        <div className="card h-full flex flex-col">
+            <div className="card-header shrink-0">
                 <h3 className="card-title">Today's Focus</h3>
-                <span className="text-xs text-[var(--text-secondary)]">
-                    Top {focusTasks.length} priority task{focusTasks.length > 1 ? 's' : ''}
-                </span>
             </div>
 
-            <div className="space-y-3">
-                {focusTasks.map((task, index) => {
-                    const dueLabel = formatDueDate(task.dueDate);
-                    const isOverdue = dueLabel === 'Overdue';
+            <div className="flex-1 space-y-3 overflow-y-auto min-h-0 pt-1">
+                {focusTasks.map((task) => {
+                    const dateInfo = formatDueDate(task.dueDate);
+                    const styles = getPriorityStyles(task.priority || 'low');
 
                     return (
                         <div
-                            key={task._id || index}
-                            className="group flex items-start gap-3 p-3 rounded-lg hover:bg-[var(--bg-hover)] transition-colors cursor-pointer border border-transparent hover:border-[var(--border)]"
+                            key={task._id}
+                            className="relative flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-[var(--border)] group hover:shadow-md transition-shadow"
+                            style={{
+                                borderLeftWidth: '3px',
+                                borderLeftColor: styles.border,
+                                height: '64px'
+                            }}
                         >
-                            {/* Complete Button */}
+                            {/* Checkbox */}
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     onToggleComplete?.(task._id);
                                 }}
-                                className="mt-0.5 flex-shrink-0 px-2 py-1 rounded-md bg-[var(--primary)] text-white text-xs hover:brightness-110 transition-colors"
-                                aria-label={`Mark "${task.title}" as complete`}
-                                title="Complete task"
+                                className="shrink-0 text-[var(--text-tertiary)] hover:text-[var(--primary)] transition-colors"
                             >
-                                Complete
+                                <Circle size={20} />
                             </button>
 
-                            {/* Task Content */}
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-start justify-between gap-2 mb-1">
-                                    <h4 className="font-medium text-sm text-[var(--text-main)] truncate">
+                            {/* Content */}
+                            <div className="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
+                                {/* Top Row: Title + Priority Badge */}
+                                <div className="flex items-center justify-between gap-2 w-full">
+                                    <h4 className="font-semibold text-[15px] truncate text-[var(--text-main)] w-full pr-16 bg-transparent">
                                         {task.title}
                                     </h4>
-                                    {task.priority && (
-                                        <PriorityBadge priority={task.priority} size="small" showLabel={false} />
-                                    )}
+
+                                    {/* Absolute positioned badge to ensure it stays in corner */}
+                                    <div className="absolute top-3 right-8">
+                                        <span
+                                            className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider"
+                                            style={{
+                                                backgroundColor: styles.badgeBg,
+                                                color: styles.badgeText
+                                            }}
+                                        >
+                                            {styles.label}
+                                        </span>
+                                    </div>
+
+                                    {/* Warning: Menu dots overlap with badge in small space? The mockup shows badge then dots. */}
+                                    {/* Using absolute for badge might overlap title. Let's try flex instead if space permits. */}
                                 </div>
 
-                                {/* Metadata */}
-                                <div className="flex items-center gap-3 text-xs text-[var(--text-secondary)]">
-                                    {dueLabel && (
-                                        <div className={`flex items-center gap-1 ${isOverdue ? 'text-red-500 font-medium' : ''}`}>
-                                            <Clock size={12} />
-                                            <span>{dueLabel}</span>
+                                {/* Bottom Row: Date • Category • Comments */}
+                                <div className="flex items-center gap-2 text-[13px] text-[var(--text-secondary)] truncate">
+                                    {dateInfo && (
+                                        <div className="flex items-center gap-1 shrink-0" style={{ color: dateInfo.color }}>
+                                            <Calendar size={12} />
+                                            <span>{dateInfo.text}</span>
                                         </div>
                                     )}
+
+                                    {(dateInfo && task.category) && <span>•</span>}
+
                                     {task.category && (
-                                        <span className="px-2 py-0.5 bg-[var(--bg-surface-alt)] rounded text-xs">
-                                            {task.category}
-                                        </span>
+                                        <span className="truncate max-w-[100px]">{task.category}</span>
                                     )}
+
+                                    {/* Mock Comment Count since data might not exist yet */}
+                                    {/* <span>•</span>
+                                    <div className="flex items-center gap-1">
+                                        <span className="text-xs">💬</span>
+                                        <span>0</span>
+                                    </div> */}
                                 </div>
                             </div>
+
+                            {/* Menu Dots */}
+                            <button
+                                className="shrink-0 absolute top-3 right-2 p-1 text-gray-400 hover:text-gray-600 rounded"
+                                aria-label="Menu"
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <circle cx="12" cy="12" r="1" />
+                                    <circle cx="12" cy="5" r="1" />
+                                    <circle cx="12" cy="19" r="1" />
+                                </svg>
+                            </button>
                         </div>
                     );
                 })}
-            </div>
-
-            {/* Quick Add Hint */}
-            <div className="mt-4 pt-4 border-t border-[var(--border)]">
-                <p className="text-xs text-[var(--text-tertiary)] text-center">
-                    Press <kbd className="px-1.5 py-0.5 bg-[var(--bg-surface-alt)] rounded text-xs font-mono">Ctrl+K</kbd> to quickly add a new task
-                </p>
             </div>
         </div>
     );

@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Mail, Github, Chrome, Eye, EyeOff, Loader2, Lock } from "lucide-react";
 import Logo from "../components/common/Logo";
+import ComingSoonPopup from "../components/common/ComingSoonPopup";
 
 const LoginPage = () => {
   const { login } = useAuth();
@@ -217,17 +218,22 @@ const LoginPage = () => {
 
           {/* FORGOT PASSWORD UNDER BUTTON */}
           <div className="flex justify-end mt-2 mb-6">
-            <Link
-              to="/forgot-password"
-              className="text-sm"
-              style={{
-                color: "var(--primary)",
-                textDecoration: "none",
-                fontWeight: 500,
-              }}
-            >
-              Forgot password?
-            </Link>
+            <ComingSoonPopup
+              message="Forgot Password is coming soon!"
+              trigger={
+                <Link
+                  to="/forgot-password"
+                  className="text-sm"
+                  style={{
+                    color: "#fff",
+                    textDecoration: "none",
+                    fontWeight: 500,
+                  }}
+                >
+                  Forgot password?
+                </Link>
+              }
+            />
           </div>
 
           {/* DIVIDER */}
@@ -237,22 +243,31 @@ const LoginPage = () => {
 
           {/* GOOGLE / GITHUB – even spacing */}
           <div className="grid grid-cols-2 gap-3 mb-6">
-            <button
-              type="button"
-              className="btn btn-secondary justify-center opacity-50 cursor-not-allowed"
-              disabled
-              title="OAuth integration coming soon"
-            >
-              <Chrome size={18} /> Google
-            </button>
-            <button
-              type="button"
-              className="btn btn-secondary justify-center opacity-50 cursor-not-allowed"
-              disabled
-              title="OAuth integration coming soon"
-            >
-              <Github size={18} /> GitHub
-            </button>
+            <ComingSoonPopup
+              message="Google sign-in is coming soon!"
+              trigger={
+                <button
+                  type="button"
+                  className="btn btn-secondary justify-center"
+                  title="Google OAuth integration coming soon"
+                >
+                  <Chrome size={18} /> Google
+                </button>
+              }
+            />
+
+            <ComingSoonPopup
+              message="GitHub sign-in is coming soon!"
+              trigger={
+                <button
+                  type="button"
+                  className="btn btn-secondary justify-center"
+                  title="GitHub OAuth integration coming soon"
+                >
+                  <Github size={18} /> GitHub
+                </button>
+              }
+            />
           </div>
 
           <div className="text-center text-xs text-gray-500 mb-4">
@@ -264,7 +279,7 @@ const LoginPage = () => {
             <Link
               to="/signup"
               style={{
-                color: "var(--primary)",
+                color: "#fff",
                 fontWeight: 600,
                 textDecoration: "none",
               }}

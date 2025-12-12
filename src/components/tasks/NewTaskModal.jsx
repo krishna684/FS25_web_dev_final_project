@@ -1,14 +1,16 @@
 import { useState } from 'react';
-import { X, Loader2 } from 'lucide-react';
+import { X, Loader2, User } from 'lucide-react';
 
-const NewTaskModal = ({ onClose, onCreate, teamId = null }) => {
+const NewTaskModal = ({ onClose, onCreate, teamId = null, teamMembers = [] }) => {
     const [formData, setFormData] = useState({
         title: '',
         description: '',
         status: 'todo',
         priority: 'medium',
         dueDate: '',
-        category: ''
+        hasDate: false,
+        category: '',
+        assignedTo: ''
     });
     const [creating, setCreating] = useState(false);
 
@@ -16,9 +18,14 @@ const NewTaskModal = ({ onClose, onCreate, teamId = null }) => {
         e.preventDefault();
         if (!formData.title.trim()) return;
 
+        const payload = {
+            ...formData,
+            dueDate: formData.hasDate ? formData.dueDate : undefined,
+        };
+
         setCreating(true);
         try {
-            await onCreate(formData);
+            await onCreate(payload);
             onClose();
         } catch (error) {
             console.error('Failed to create task:', error);
@@ -29,52 +36,56 @@ const NewTaskModal = ({ onClose, onCreate, teamId = null }) => {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fadeIn">
-            <div className="modal-content bg-white dark:bg-[var(--bg-surface)] w-full max-w-lg rounded-xl shadow-2xl animate-slideUp">
+            <div className="modal-content bg-white dark:bg-[var(--bg-surface)] w-full max-w-2xl rounded-2xl shadow-2xl animate-slideUp">
                 {/* Header */}
-                <div className="p-6 border-b border-[var(--border)]">
-                    <div className="flex justify-between items-center">
-                        <h3 className="text-xl font-bold text-[var(--text-main)]">
-                            {teamId ? 'Create Team Task' : 'Create New Task'}
-                        </h3>
+                <div className="p-6 border-b border-[var(--border)] bg-gradient-to-r from-indigo-50 via-white to-blue-50 dark:from-[#101827] dark:via-[#0b1220] dark:to-[#0b1220] rounded-t-2xl">
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <p className="text-xs uppercase tracking-wide text-[var(--text-secondary)]">New Task</p>
+                            <h3 className="text-2xl font-bold text-[var(--text-main)] mt-1">
+                                {teamId ? 'Create Team Task' : 'Create New Task'}
+                            </h3>
+                            <p className="text-sm text-[var(--text-secondary)] mt-1">Provide details to keep your team in sync.</p>
+                        </div>
                         <button
                             onClick={onClose}
-                            className="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-1 hover:bg-[var(--bg-hover)] rounded transition-colors"
+                            className="text-[var(--text-secondary)] hover:text-[var(--text-main)] p-2 hover:bg-[var(--bg-hover)] rounded-full transition-colors"
                             aria-label="Close"
                         >
-                            <X size={24} />
+                            <X size={22} />
                         </button>
                     </div>
                 </div>
 
                 {/* Form */}
-                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                <form onSubmit={handleSubmit} className="p-8 space-y-5">
                     <div className="form-group">
-                        <label className="form-label">Task Title *</label>
+                        <label className="form-label font-semibold">Task Title *</label>
                         <input
                             type="text"
                             className="form-input"
                             value={formData.title}
                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                            placeholder="Enter task title"
+                            placeholder="e.g., Prepare sprint demo"
                             required
                             autoFocus
                         />
                     </div>
 
                     <div className="form-group">
-                        <label className="form-label">Description</label>
+                        <label className="form-label font-semibold">Description</label>
                         <textarea
-                            className="form-input min-h-[100px]"
+                            className="form-input min-h-[120px]"
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                            placeholder="Add task description..."
-                            rows={3}
+                            placeholder="What needs to be done? Add context, links, and details."
+                            rows={4}
                         />
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="form-group">
-                            <label className="form-label">Status</label>
+                            <label className="form-label font-semibold">Status</label>
                             <select
                                 className="form-input"
                                 value={formData.status}
@@ -87,7 +98,7 @@ const NewTaskModal = ({ onClose, onCreate, teamId = null }) => {
                         </div>
 
                         <div className="form-group">
-                            <label className="form-label">Priority</label>
+                            <label className="form-label font-semibold">Priority</label>
                             <select
                                 className="form-input"
                                 value={formData.priority}
@@ -100,31 +111,62 @@ const NewTaskModal = ({ onClose, onCreate, teamId = null }) => {
                         </div>
                     </div>
 
-                    <div className="form-group">
-                        <label className="form-label">Due Date</label>
-                        <input
-                            type="date"
-                            className="form-input"
-                            value={formData.dueDate}
-                            onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-                        />
-                    </div>
-
-                    {!teamId && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="form-group">
-                            <label className="form-label">Category</label>
+                            <label className="form-label font-semibold flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    checked={formData.hasDate}
+                                    onChange={(e) => setFormData({ ...formData, hasDate: e.target.checked })}
+                                    className="h-4 w-4 rounded border-gray-300 text-[var(--primary)] focus:ring-[var(--primary)]"
+                                />
+                                Add Due Date
+                            </label>
                             <input
-                                type="text"
-                                className="form-input"
-                                value={formData.category}
-                                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                                placeholder="Work, Personal, School..."
+                                type="date"
+                                className="form-input mt-2"
+                                value={formData.dueDate}
+                                onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                                disabled={!formData.hasDate}
                             />
                         </div>
-                    )}
+
+                        {!teamId && (
+                            <div className="form-group">
+                                <label className="form-label font-semibold">Category</label>
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    value={formData.category}
+                                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                                    placeholder="Work, Personal, School..."
+                                />
+                            </div>
+                        )}
+
+                        {teamId && teamMembers.length > 0 && (
+                            <div className="form-group">
+                                <label className="form-label font-semibold flex items-center gap-2">
+                                    <User size={16} /> Assign To
+                                </label>
+                                <select
+                                    className="form-input"
+                                    value={formData.assignedTo}
+                                    onChange={(e) => setFormData({ ...formData, assignedTo: e.target.value })}
+                                >
+                                    <option value="">Unassigned</option>
+                                    {teamMembers.map((member) => (
+                                        <option key={member._id} value={member.user?._id || member._id}>
+                                            {member.user?.name || member.name || member.user?.email || 'Member'}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+                    </div>
 
                     {/* Actions */}
-                    <div className="flex justify-end gap-3 pt-4">
+                    <div className="flex justify-end gap-3 pt-2">
                         <button
                             type="button"
                             onClick={onClose}
