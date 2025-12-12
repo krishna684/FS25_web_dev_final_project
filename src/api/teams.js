@@ -7,6 +7,9 @@ const teamApi = {
   // Create a new team
   create: (teamData) => axiosClient.post("/teams", teamData),
 
+  // Get team preview by invite code (before joining)
+  getPreview: (inviteCode) => axiosClient.get(`/teams/preview/${inviteCode}`),
+
   // Join a team via invite code
   join: (inviteCode) =>
     axiosClient.post("/teams/join", { inviteCode }),

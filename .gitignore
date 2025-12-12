@@ -7,12 +7,12 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-
 # AI/IDE related
 .history/
 .python_envs/
 .ipynb_checkpoints/
 .vscode/
+!.vscode/extensions.json
 .idea/
 .code-workspace
 .spyproject/
@@ -34,12 +34,12 @@ dist/
 build/
 dist-ssr/
 
-# Misc
-.DS_Store
+# Environment files
 .env
 .env.local
 .env.development.local
 .env.test.local
+.env.production.local
 
 # Vercel
 .vercel
@@ -50,21 +50,31 @@ dist-ssr/
 # Coverage
 coverage/
 
+# Test files
+tests/
+*test*.js
+create_test_user.js
+check_users.js
+verify_*.js
+
+# Test output
+test-results/
+
+# OS files
+.DS_Store
+Thumbs.db
+*~
+
+# Windows
+*.exe
+*.dll
+
 # IDE
-.vscode/
-!.vscode/extensions.json
-.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-
-# OS
-Thumbs.db
-
-# Test output
-test-results/
 
 # Optional npm cache directory
 .npm
@@ -80,18 +90,3 @@ test-results/
 
 # Jupyter
 .ipynb_checkpoints
-
-# Windows
-*.exe
-*.dll
-*.bat
-*.cmd
-
-# Mac
-*.DS_Store
-
-# Linux
-*~
-
-# Editor directories and files
-...existing code...

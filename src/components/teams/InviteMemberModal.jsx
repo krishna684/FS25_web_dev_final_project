@@ -24,7 +24,8 @@ const InviteMemberModal = ({ isOpen, onClose, teamName, inviteCode, onRegenerate
             await onRegenerateCode();
         } catch (error) {
             console.error('Error regenerating invite code:', error);
-            alert('Failed to regenerate invite code. Please try again.');
+            const errorMsg = error.response?.data?.error || 'Failed to regenerate invite code. Please try again.';
+            alert(errorMsg);
         } finally {
             setRegenerating(false);
         }

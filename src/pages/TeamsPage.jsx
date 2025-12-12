@@ -113,27 +113,13 @@ const TeamsPage = () => {
     }
   };
 
-  // Fetch team preview for join modal
+  // Fetch team preview for join modal - uses API
   const fetchTeamPreview = async (inviteCode) => {
     try {
-      // First check if it's in our current teams list
-      const localTeam = teams.find((t) => t.inviteCode === inviteCode);
-      if (localTeam) {
-        return {
-          _id: localTeam._id,
-          name: localTeam.name,
-          description: localTeam.description,
-          colorTheme: localTeam.colorTheme,
-          memberCount: localTeam.members?.length || 0,
-        };
-      }
-      
-      // If not found locally, we would call an API endpoint
-      // For now, simulate a team preview response
-      // In a real app, you'd have an endpoint like: GET /api/teams/preview?code=XXXX
-      throw new Error('Invalid invite code');
+      const response = await teamApi.getPreview(inviteCode);
+      return response.data;
     } catch (error) {
-      throw new Error('Invalid invite code');
+      throw new Error(error.response?.data?.error || 'Invalid invite code');
     }
   };
 

@@ -181,14 +181,9 @@ const TeamBoardPage = () => {
 
   // Regenerate invite code handler
   const handleRegenerateInviteCode = async () => {
-    try {
-      const response = await teamApi.regenerateInviteCode(teamId);
-      // Update the team state with new invite code
-      setTeam(prev => ({ ...prev, inviteCode: response.data.inviteCode }));
-    } catch (err) {
-      console.error("Failed to regenerate invite code", err);
-      throw err; // Re-throw to let the modal handle the error
-    }
+    const response = await teamApi.regenerateInviteCode(teamId);
+    // Update the team state with new invite code
+    setTeam(prev => ({ ...prev, inviteCode: response.data.inviteCode }));
   };
 
   // If navigated with a taskId (e.g., from dashboard), open that task's details

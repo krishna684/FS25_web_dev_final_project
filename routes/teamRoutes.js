@@ -11,6 +11,9 @@ router.post('/', teamController.createTeam);
 // GET /api/teams
 router.get('/', teamController.getUserTeams);
 
+// GET /api/teams/preview/:inviteCode - Preview team by invite code (before joining)
+router.get('/preview/:inviteCode', teamController.getTeamPreview);
+
 // POST /api/teams/join
 router.post('/join', teamController.joinTeam);
 

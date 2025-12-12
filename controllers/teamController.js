@@ -344,3 +344,36 @@ exports.regenerateInviteCode = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+// Get team preview by invite code (for join modal)
+exports.getTeamPreview = async (req, res) => {
+    try {
+        const { inviteCode } = req.params;
+
+        if (!inviteCode) {
+            return res.status(400).json({ error: 'Invite code is required' });
+        }
+
+        const team = await Team.findOne({ inviteCode: inviteCode.toUpperCase() })
+            .select('name description colorTheme members');
+
+        if (!team) {
+            return res.status(404).json({ error: 'Invalid invite code' });
+        }
+
+        // Check if user is already a member
+        const isMember = team.members.some(m => m.user.toString() === req.user.userId);
+
+        res.json({
+            _id: team._id,
+            name: team.name,
+            description: team.description,
+            colorTheme: team.colorTheme,
+            memberCount: team.members.length,
+            alreadyMember: isMember
+        });
+    } catch (err) {
+        console.error('Get Team Preview Error:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
