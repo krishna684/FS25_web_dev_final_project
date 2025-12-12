@@ -60,9 +60,20 @@ export const TaskProvider = ({ children }) => {
     }
   };
 
+  const updateTask = async (taskId, updates) => {
+    try {
+      const res = await taskApi.update(taskId, updates);
+      setTasks((prev) => prev.map((t) => (t._id === taskId ? res.data : t)));
+      return res.data;
+    } catch (err) {
+      console.error("Failed to update task", err);
+      throw err;
+    }
+  };
+
   return (
     <TaskContext.Provider
-      value={{ tasks, loading, addTask, toggleTask, deleteTask, refresh: fetchTasks }}
+      value={{ tasks, loading, addTask, updateTask, toggleTask, deleteTask, refresh: fetchTasks }}
     >
       {children}
     </TaskContext.Provider>

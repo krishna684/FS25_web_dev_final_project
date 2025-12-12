@@ -10,13 +10,15 @@ import teamApi from "../api/teams";
 import { Link, useNavigate } from "react-router-dom";
 import { CheckCircle2, AlertCircle, Users, ArrowRight, Circle } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { useTasks } from "../context/TaskContext";
 import { formatDueDate, getDueDateStatus, getDueDateColor, getPriorityConfig, getCommentCount } from "../utils/taskHelpers";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { tasks, addTask, toggleTask, refresh: refreshTasks } = useTasks();
   const [stats, setStats] = useState(null);
-  const [tasks, setTasks] = useState([]);
+  const [teamsCount, setTeamsCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activity, setActivity] = useState([]);
@@ -30,7 +32,7 @@ const DashboardPage = () => {
     return "Good evening";
   };
 
-  const computeStats = useCallback((allTasks, teamsCount) => {
+  const computeStats = useCallback((allTasks, numTeams) => {
     const overdue = allTasks.filter((t) => {
       if (t.status === "done" || !t.dueDate) return false;
       return new Date(t.dueDate) < new Date();
@@ -53,44 +55,44 @@ const DashboardPage = () => {
       completedTasks: allTasks.filter((t) => t.status === "done").length,
       completedTrend,
       overdueTasks: overdue,
-      teams: teamsCount,
+      teams: numTeams,
       upcomingDeadlines: allTasks.filter((t) => t.status !== "done" && t.dueDate)
         .length,
     };
   }, []);
 
+  // Fetch teams and activity (tasks come from TaskContext)
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      const [tasksRes, teamsRes] = await Promise.all([
-        taskApi.getAll(),
-        teamApi.getAll(),
-      ]);
+      const teamsRes = await teamApi.getAll();
 
-        let recentActivity = [];
-        try {
-          const activityRes = await import("../api/activity").then((m) =>
-            m.default.getUserActivity()
-          );
-          recentActivity = activityRes.data;
-        } catch (e) {
-          console.warn("Activity load failed", e);
-        }
-
-        const allTasks = tasksRes.data;
-        const teams = teamsRes.data;
-        setTasks(allTasks);
-
-        setStats(computeStats(allTasks, teams.length));
-
-        setActivity(recentActivity);
-        setLoading(false);
-      } catch (err) {
-        console.error("Dashboard load error", err);
-        setError("Failed to load dashboard data.");
-        setLoading(false);
+      let recentActivity = [];
+      try {
+        const activityRes = await import("../api/activity").then((m) =>
+          m.default.getUserActivity()
+        );
+        recentActivity = activityRes.data;
+      } catch (e) {
+        console.warn("Activity load failed", e);
       }
-  }, [computeStats]);
+
+      setTeamsCount(teamsRes.data.length);
+      setActivity(recentActivity);
+      setLoading(false);
+    } catch (err) {
+      console.error("Dashboard load error", err);
+      setError("Failed to load dashboard data.");
+      setLoading(false);
+    }
+  }, []);
+
+  // Compute stats whenever tasks change
+  useEffect(() => {
+    if (tasks.length > 0 || teamsCount > 0) {
+      setStats(computeStats(tasks, teamsCount));
+    }
+  }, [tasks, teamsCount, computeStats]);
 
   useEffect(() => {
     fetchData();
@@ -118,49 +120,15 @@ const DashboardPage = () => {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  // Use TaskContext's addTask - this updates both Dashboard and TasksPage
   const handleCreateTask = async (taskData) => {
-    const res = await taskApi.create({ ...taskData, isTeamTask: false });
-    const created = res.data;
-
-    setTasks((prev) => {
-      const updated = [created, ...prev];
-      setStats((prevStats) => {
-        if (!prevStats) return prevStats;
-        return computeStats(updated, prevStats.teams);
-      });
-      return updated;
-    });
-
+    const created = await addTask(taskData);
     return created;
   };
 
+  // Use TaskContext's toggleTask - this updates both Dashboard and TasksPage
   const handleToggleComplete = async (taskId) => {
-    try {
-      const task = tasks.find((t) => t._id === taskId);
-      if (!task) return;
-
-      const newStatus = task.status === "done" ? "in-progress" : "done";
-      await taskApi.update(taskId, { status: newStatus });
-
-      const updatedTasks = tasks.map((t) =>
-        t._id === taskId ? { ...t, status: newStatus } : t
-      );
-
-      setTasks(updatedTasks);
-
-      setStats((prev) =>
-        prev
-          ? {
-              ...prev,
-              completedTasks: updatedTasks.filter(
-                (t) => t.status === "done"
-              ).length,
-            }
-          : prev
-      );
-    } catch (err) {
-      console.error("Failed to update task", err);
-    }
+    await toggleTask(taskId);
   };
 
   const calendarEvents = useMemo(
